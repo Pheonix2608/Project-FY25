@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "text": "hi"
+    },
+    {
+        "role": "bot",
+        "text": "I'm not sure what to say."
+    }
+]
