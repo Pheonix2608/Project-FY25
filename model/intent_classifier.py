@@ -4,6 +4,7 @@
 # Intent classification module with a factory pattern for different models.
 # ==============================================================================
 import pickle
+import json
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import SVC
@@ -71,14 +72,31 @@ class SVMIntentClassifier:
             return
 
         self.intents = sorted(list(set(labels)))
-        self.vectorizer = TfidfVectorizer()
         
+        # Improved TF-IDF vectorizer with better parameters
+        self.vectorizer = TfidfVectorizer(
+            max_features=5000,
+            ngram_range=(1, 2),
+            min_df=1,
+            max_df=0.95,
+            stop_words='english'
+        )
+        
+        # Use stratified split to ensure all classes are represented
         X_train, X_test, y_train, y_test = train_test_split(
-            patterns, labels, test_size=0.2, random_state=42
+            patterns, labels, test_size=0.2, random_state=42, stratify=labels
         )
         
         X_train_vec = self.vectorizer.fit_transform(X_train)
-        self.model = SVC(kernel='linear')
+        
+        # Improved SVM with better parameters
+        self.model = SVC(
+            kernel='rbf',
+            C=1.0,
+            gamma='scale',
+            probability=True,
+            random_state=42
+        )
         self.model.fit(X_train_vec, y_train)
         
         X_test_vec = self.vectorizer.transform(X_test)
@@ -125,8 +143,18 @@ class SVMIntentClassifier:
             return 'default'
 
         vectorized_text = self.vectorizer.transform([text])
+        
+        # Get prediction and confidence score
         predicted_intent = self.model.predict(vectorized_text)[0]
-        logger.info(f"Predicted intent (SVM): '{predicted_intent}'")
+        confidence_scores = self.model.predict_proba(vectorized_text)[0]
+        max_confidence = max(confidence_scores)
+        
+        logger.info(f"Predicted intent (SVM): '{predicted_intent}' with confidence: {max_confidence:.3f}")
+        
+        # If confidence is too low, return 'no_match'
+        if max_confidence < 0.3:
+            logger.info(f"Low confidence ({max_confidence:.3f}), returning 'no_match'")
+            return 'no_match'
         
         return predicted_intent
 

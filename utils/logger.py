@@ -35,7 +35,8 @@ def get_logger(name):
             os.path.join(config.LOG_DIR, f'{config.LOG_FILE_PREFIX}.log'),
             when='midnight',
             interval=1,
-            backupCount=7
+            backupCount=7,
+            delay=True  # Delay file creation until first write
         )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)

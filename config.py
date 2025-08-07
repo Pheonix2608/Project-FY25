@@ -11,7 +11,7 @@ class Config:
     """
     # ==================== GENERAL CONFIG ====================
     PROJECT_NAME = "Intelligent Chatbot"
-    VERSION = "1.1.0"
+    VERSION = "1.2.0"
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
     # ==================== DATA CONFIG ====================
