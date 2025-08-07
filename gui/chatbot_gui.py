@@ -1,173 +1,190 @@
-# ==============================================================================
-# gui/chatbot_gui.py
-# The PyQt6-based GUI for the chatbot.
-# ==============================================================================
-from PyQt6.QtWidgets import (QMainWindow, QVBoxLayout, QWidget, QTextEdit, 
-                             QLineEdit, QPushButton, QHBoxLayout, QScrollArea,
-                             QFrame, QLabel, QSpacerItem, QSizePolicy, QMessageBox)
+# chatbot_gui.py (Revamped GUI with JSON Export)
+
+"""
+This module defines the ChatbotGUI class which provides the graphical user interface
+for interacting with the chatbot. It supports theme switching, model switching,
+chat history saving/loading, and exporting chat logs as text or JSON.
+"""
+
+import sys
+import json
+from datetime import datetime
+from PyQt6.QtWidgets import (
+    QWidget, QTextEdit, QVBoxLayout, QHBoxLayout, QPushButton,
+    QLineEdit, QLabel, QComboBox, QFileDialog, QMessageBox, QApplication
+)
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QTextCursor, QFont
-from utils.logger import get_logger
-from config import Config
-import random
 
-logger = get_logger(__name__)
+class ChatbotGUI(QWidget):
+    """Main GUI class for the chatbot application."""
 
-class ChatbotGUI(QMainWindow):
-    """
-    A graphical user interface for the chatbot using PyQt6.
-    """
-    def __init__(self, parent=None):
-        # The parent is the ChatbotApp instance, but we don't pass it to QMainWindow
-        # since ChatbotApp is not a QWidget.
-        super().__init__() 
-        self.app_logic = parent
-        self.config = Config()
+    def __init__(self, app):
+        """
+        Initialize the GUI, set geometry, theme, and build layout.
+
+        Args:
+            app (ChatbotApp): The main application instance.
+        """
+        super().__init__()
+        self.app_instance = app
+        self.config = app.config
         self.current_theme = "light"
-        
-        self.setup_ui()
+        self.conversation_log = []  # Store chat as structured data
+
+        self.setGeometry(100, 100, self.config.GUI_WIDTH, self.config.GUI_HEIGHT)
+        self.init_ui()
         self.apply_theme(self.current_theme)
-        logger.info("Chatbot GUI initialized.")
-        
-    def setup_ui(self):
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
-        
-        header_layout = QHBoxLayout()
-        
-        self.retrain_button = QPushButton("Retrain Model")
-        self.retrain_button.clicked.connect(self.app_logic.retrain_model)
-        header_layout.addWidget(self.retrain_button)
-        
-        self.save_history_button = QPushButton("Save History")
-        self.save_history_button.clicked.connect(self.app_logic.save_history)
-        header_layout.addWidget(self.save_history_button)
-        
-        self.load_history_button = QPushButton("Load History")
-        self.load_history_button.clicked.connect(self.app_logic.load_history)
-        header_layout.addWidget(self.load_history_button)
-        
-        self.theme_button = QPushButton("Toggle Theme")
-        self.theme_button.clicked.connect(self.toggle_theme)
-        header_layout.addWidget(self.theme_button)
-        
-        main_layout.addLayout(header_layout)
-        
-        self.chat_area = QWidget()
-        self.chat_layout = QVBoxLayout(self.chat_area)
-        self.chat_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(self.chat_area)
-        main_layout.addWidget(self.scroll_area)
-        
-        input_layout = QHBoxLayout()
-        self.user_input = QLineEdit()
-        self.user_input.setPlaceholderText("Type your message here...")
-        self.user_input.returnPressed.connect(self.send_message)
-        input_layout.addWidget(self.user_input)
-        
+
+    def init_ui(self):
+        """Initializes all UI components and layouts."""
+        self.setStyleSheet("font-size: 14px;")
+
+        # Chat display area
+        self.chat_display = QTextEdit()
+        self.chat_display.setReadOnly(True)
+
+        # Input area
+        self.input_field = QLineEdit()
+        self.input_field.setPlaceholderText("Type your message here...")
+        self.input_field.returnPressed.connect(self.send_message)
+
+        # Buttons and their actions
         self.send_button = QPushButton("Send")
         self.send_button.clicked.connect(self.send_message)
-        input_layout.addWidget(self.send_button)
-        
-        main_layout.addLayout(input_layout)
-        
-        if not self.app_logic.context_handler.get_context():
-            self.display_message("Bot", "Hello! How can I help you today?")
-        
-    def apply_theme(self, theme_name):
-        theme = self.config.THEMES.get(theme_name, self.config.THEMES['light'])
-        
-        style = f"""
-            QMainWindow {{
-                background-color: {theme['window_bg']};
-            }}
-            QScrollArea {{
-                border: 1px solid {theme['border_color']};
-                border-radius: 10px;
-                background-color: {theme['chat_bg']};
-            }}
-            QLineEdit {{
-                background-color: {theme['input_bg']};
-                color: {theme['input_text']};
-                border: 1px solid {theme['border_color']};
-                border-radius: 10px;
-                padding: 5px;
-            }}
-            QPushButton {{
-                background-color: {theme['bot_bubble_bg']};
-                color: {theme['bot_text_color']};
-                border: none;
-                border-radius: 10px;
-                padding: 8px 15px;
-            }}
-            QPushButton:hover {{
-                background-color: {theme['bot_bubble_bg']};
-                opacity: 0.8;
-            }}
-        """
-        self.setStyleSheet(style)
-        self.chat_area.setStyleSheet(f"background-color: {theme['chat_bg']};")
-        self.current_theme = theme_name
-        logger.info(f"Theme set to '{theme_name}'.")
 
-    def toggle_theme(self):
-        if self.current_theme == "light":
-            self.apply_theme("dark")
-        else:
-            self.apply_theme("light")
-            
+        self.save_button = QPushButton("Save")
+        self.save_button.clicked.connect(self.app_instance.save_history)
+
+        self.load_button = QPushButton("Load")
+        self.load_button.clicked.connect(self.app_instance.load_history)
+
+        self.export_button = QPushButton("Export Chat")
+        self.export_button.clicked.connect(self.export_chat)
+
+        self.export_json_button = QPushButton("Export JSON")
+        self.export_json_button.clicked.connect(self.export_chat_json)
+
+        self.retrain_button = QPushButton("Retrain Model")
+        self.retrain_button.clicked.connect(self.app_instance.retrain_model)
+
+        # Typing indicator
+        self.typing_label = QLabel("")
+
+        # Dropdown for model selection
+        self.model_dropdown = QComboBox()
+        self.model_dropdown.addItems(["svm", "bert"])
+        self.model_dropdown.setCurrentText(self.config.MODEL_TYPE)
+        self.model_dropdown.currentTextChanged.connect(self.switch_model)
+
+        # Theme switcher
+        self.theme_dropdown = QComboBox()
+        self.theme_dropdown.addItems(["light", "dark"])
+        self.theme_dropdown.setCurrentText(self.current_theme)
+        self.theme_dropdown.currentTextChanged.connect(self.switch_theme)
+
+        # Layouts
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.send_button)
+        btn_layout.addWidget(self.save_button)
+        btn_layout.addWidget(self.load_button)
+        btn_layout.addWidget(self.export_button)
+        btn_layout.addWidget(self.export_json_button)
+        btn_layout.addWidget(self.retrain_button)
+
+        settings_layout = QHBoxLayout()
+        settings_layout.addWidget(QLabel("Model:"))
+        settings_layout.addWidget(self.model_dropdown)
+        settings_layout.addWidget(QLabel("Theme:"))
+        settings_layout.addWidget(self.theme_dropdown)
+        settings_layout.addStretch()
+
+        layout = QVBoxLayout()
+        layout.addLayout(settings_layout)
+        layout.addWidget(self.chat_display)
+        layout.addWidget(self.typing_label)
+        layout.addWidget(self.input_field)
+        layout.addLayout(btn_layout)
+
+        self.setLayout(layout)
+
     def display_message(self, sender, message):
-        theme = self.config.THEMES.get(self.current_theme)
-        bubble_color = theme['user_bubble_bg'] if sender == "User" else theme['bot_bubble_bg']
-        text_color = theme['user_text_color'] if sender == "User" else theme['bot_text_color']
-        
-        bubble_frame = QFrame()
-        bubble_frame.setStyleSheet(f"""
-            QFrame {{
-                background-color: {bubble_color};
-                border-radius: 15px;
-                padding: 10px;
-            }}
-        """)
-        
-        message_label = QLabel(message)
-        message_label.setStyleSheet(f"color: {text_color};")
-        message_label.setWordWrap(True)
-        
-        bubble_layout = QVBoxLayout(bubble_frame)
-        bubble_layout.addWidget(message_label)
-        
-        container_widget = QWidget()
-        container_layout = QHBoxLayout(container_widget)
-        
-        if sender == "User":
-            container_layout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
-            container_layout.addWidget(bubble_frame)
-        else:
-            container_layout.addWidget(bubble_frame)
-            container_layout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
-        
-        self.chat_layout.addWidget(container_widget)
-        
-        QTimer.singleShot(100, lambda: self.scroll_area.verticalScrollBar().setValue(
-            self.scroll_area.verticalScrollBar().maximum()))
+        """Displays a message in the chat window with a timestamp."""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        formatted_message = f"[{timestamp}] <b>{sender}:</b> {message}"
+        self.chat_display.append(formatted_message)
+        self.conversation_log.append({"time": timestamp, "sender": sender, "text": message})
 
     def clear_chat(self):
-        while self.chat_layout.count():
-            item = self.chat_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-            
+        """Clears the chat display and resets conversation log."""
+        self.chat_display.clear()
+        self.conversation_log.clear()
+
     def send_message(self):
-        user_text = self.user_input.text()
-        if user_text:
-            self.display_message("User", user_text)
-            
-            bot_response = self.app_logic.process_input(user_text)
-            self.display_message("Bot", bot_response)
-            
-            self.user_input.clear()
+        """Handles user input and triggers bot response with a typing delay."""
+        user_input = self.input_field.text().strip()
+        if not user_input:
+            return
+
+        self.display_message("User", user_input)
+        self.input_field.clear()
+        self.typing_label.setText("Bot is typing...")
+        QTimer.singleShot(1000, lambda: self.generate_response(user_input))
+
+    def generate_response(self, user_input):
+        """Gets response from bot and displays it."""
+        response = self.app_instance.process_input(user_input)
+        self.typing_label.clear()
+        self.display_message("Bot", response)
+
+    def switch_model(self, new_model):
+        """Handles logic for switching between different model types."""
+        if new_model != self.config.MODEL_TYPE:
+            reply = QMessageBox.question(
+                self, "Switch Model",
+                f"Switch model to '{new_model}' and restart training?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self.config.MODEL_TYPE = new_model
+                self.app_instance.retrain_model()
+                self.display_message("Bot", f"Switched to '{new_model}' model and retrained.")
+
+    def switch_theme(self, new_theme):
+        """Applies the selected GUI theme."""
+        if new_theme in self.config.THEMES:
+            self.current_theme = new_theme
+            self.apply_theme(new_theme)
+
+    def apply_theme(self, theme_name):
+        """Sets the theme styles for the entire interface."""
+        theme = self.config.THEMES[theme_name]
+        self.setStyleSheet(f""
+            f"background-color: {theme['window_bg']};"
+            f"color: {theme['user_text_color']};"
+            f"font-size: 14px;"
+        )
+        self.chat_display.setStyleSheet(f"background-color: {theme['chat_bg']}; color: {theme['user_text_color']};")
+        self.input_field.setStyleSheet(f"background-color: {theme['input_bg']}; color: {theme['input_text']};")
+        self.typing_label.setStyleSheet(f"color: {theme['bot_text_color']};")
+
+    def export_chat(self):
+        """Exports the chat history as a plain text file."""
+        filename, _ = QFileDialog.getSaveFileName(self, "Export Chat", "chat_export.txt", "Text Files (*.txt)")
+        if filename:
+            try:
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(self.chat_display.toPlainText())
+                QMessageBox.information(self, "Export Successful", f"Chat exported to {filename}")
+            except Exception as e:
+                QMessageBox.critical(self, "Export Failed", str(e))
+
+    def export_chat_json(self):
+        """Exports the chat history in structured JSON format."""
+        filename, _ = QFileDialog.getSaveFileName(self, "Export Chat (JSON)", "chat_export.json", "JSON Files (*.json)")
+        if filename:
+            try:
+                with open(filename, 'w', encoding='utf-8') as f:
+                    json.dump(self.conversation_log, f, indent=4)
+                QMessageBox.information(self, "Export Successful", f"Chat exported to {filename}")
+            except Exception as e:
+                QMessageBox.critical(self, "Export Failed", str(e))

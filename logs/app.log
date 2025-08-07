@@ -1,15 +1,74 @@
-2025-08-05 15:25:14,693 - __main__ - INFO - Initializing Chatbot Application...
-2025-08-05 15:25:14,719 - utils.preprocessing - INFO - Text preprocessor initialized.
-2025-08-05 15:25:14,721 - model.intent_classifier - INFO - SVM intent classifier initialized.
-2025-08-05 15:25:14,722 - model.response_handler - INFO - Response handler initialized with rules-based responses.
-2025-08-05 15:25:14,725 - model.intent_classifier - INFO - Loading SVM model from disk...
-2025-08-05 15:25:14,794 - model.intent_classifier - INFO - SVM model and vectorizer loaded successfully.
-2025-08-05 15:25:14,796 - __main__ - INFO - Model loaded successfully.
-2025-08-05 15:25:16,053 - gui.chatbot_gui - INFO - Theme set to 'light'.
-2025-08-05 15:25:16,055 - gui.chatbot_gui - INFO - Chatbot GUI initialized.
-2025-08-05 15:25:16,083 - __main__ - INFO - Conversation history loaded successfully.
-2025-08-05 15:25:16,218 - __main__ - INFO - Chatbot Application initialized and ready.
-2025-08-05 15:25:36,540 - model.intent_classifier - INFO - Predicted intent (SVM): 'greeting' with confidence: 0.774
-2025-08-05 15:25:36,541 - model.response_handler - INFO - Getting response for intent 'greeting' with context: [{'role': 'user', 'text': 'hi'}, {'role': 'bot', 'text': "I'm not sure what to say."}, {'role': 'user', 'text': 'hi'}]
-2025-08-05 15:25:44,208 - model.intent_classifier - INFO - Predicted intent (SVM): 'joke' with confidence: 0.969
-2025-08-05 15:25:44,209 - model.response_handler - INFO - Getting response for intent 'joke' with context: [{'role': 'user', 'text': 'hi'}, {'role': 'bot', 'text': 'Hi! Nice to meet you. How can I assist?'}, {'role': 'user', 'text': 'tell me a joke'}]
+2025-08-07 12:41:57,703 - __main__ - INFO - Initializing Chatbot Application...
+2025-08-07 12:41:57,735 - utils.preprocessing - INFO - Text preprocessor initialized.
+2025-08-07 12:41:57,743 - model.intent_classifier - INFO - SVM intent classifier initialized.
+2025-08-07 12:41:57,743 - model.response_handler - INFO - Response handler initialized with rules-based responses.
+2025-08-07 12:41:57,743 - model.intent_classifier - INFO - Loading SVM model from disk...
+2025-08-07 12:41:57,751 - model.intent_classifier - INFO - SVM model and vectorizer loaded successfully.
+2025-08-07 12:41:57,752 - __main__ - INFO - Model loaded successfully.
+2025-08-07 12:41:59,058 - __main__ - INFO - Conversation history loaded successfully.
+2025-08-07 12:41:59,476 - __main__ - INFO - Chatbot Application initialized and ready.
+2025-08-07 12:42:23,412 - model.intent_classifier - INFO - Predicted intent (SVM): 'greeting' with confidence: 0.774
+2025-08-07 12:42:23,428 - model.response_handler - INFO - Getting response for intent 'greeting' with context: [{'role': 'user', 'text': 'hi'}, {'role': 'bot', 'text': "I'm not sure what to say."}, {'role': 'user', 'text': 'hi'}]
+2025-08-07 12:42:30,711 - model.intent_classifier - INFO - Predicted intent (SVM): 'joke' with confidence: 0.969
+2025-08-07 12:42:30,711 - model.response_handler - INFO - Getting response for intent 'joke' with context: [{'role': 'user', 'text': 'hi'}, {'role': 'bot', 'text': 'Hi! Nice to meet you. How can I assist?'}, {'role': 'user', 'text': 'tell me a joke'}]
+2025-08-07 12:42:42,204 - __main__ - INFO - Retraining command received. Starting model retraining...
+2025-08-07 12:42:42,204 - model.intent_classifier - INFO - Starting SVM model training process...
+2025-08-07 12:42:42,629 - model.intent_classifier - INFO - SVM Model training complete. Accuracy on test data: 0.63
+2025-08-07 12:42:42,656 - model.intent_classifier - INFO - Classification Report:
+              precision    recall  f1-score   support
+
+   about_bot       0.50      0.17      0.25         6
+         age       1.00      0.67      0.80         6
+     apology       1.00      1.00      1.00         7
+  compliment       0.00      0.00      0.00         7
+     creator       1.00      0.17      0.29         6
+    feedback       1.00      0.17      0.29         6
+     goodbye       0.20      0.83      0.32        12
+    greeting       0.92      1.00      0.96        12
+        help       1.00      0.50      0.67         8
+        joke       1.00      0.88      0.93         8
+       music       1.00      0.88      0.93         8
+        name       0.00      0.00      0.00         7
+        news       0.83      0.83      0.83         6
+status_check       0.00      0.00      0.00         6
+      thanks       1.00      1.00      1.00        10
+        time       0.88      1.00      0.93         7
+     weather       1.00      0.71      0.83         7
+
+    accuracy                           0.63       129
+   macro avg       0.73      0.58      0.59       129
+weighted avg       0.73      0.63      0.62       129
+
+2025-08-07 12:42:42,662 - model.intent_classifier - INFO - SVM model and vectorizer saved successfully.
+2025-08-07 12:42:42,662 - __main__ - INFO - Model retraining completed successfully.
+2025-08-07 12:42:51,666 - model.intent_classifier - INFO - Predicted intent (SVM): 'time' with confidence: 0.761
+2025-08-07 12:42:58,850 - __main__ - INFO - Retraining command received. Starting model retraining...
+2025-08-07 12:42:58,850 - model.intent_classifier - INFO - Starting SVM model training process...
+2025-08-07 12:42:59,050 - model.intent_classifier - INFO - SVM Model training complete. Accuracy on test data: 0.63
+2025-08-07 12:42:59,066 - model.intent_classifier - INFO - Classification Report:
+              precision    recall  f1-score   support
+
+   about_bot       0.50      0.17      0.25         6
+         age       1.00      0.67      0.80         6
+     apology       1.00      1.00      1.00         7
+  compliment       0.00      0.00      0.00         7
+     creator       1.00      0.17      0.29         6
+    feedback       1.00      0.17      0.29         6
+     goodbye       0.20      0.83      0.32        12
+    greeting       0.92      1.00      0.96        12
+        help       1.00      0.50      0.67         8
+        joke       1.00      0.88      0.93         8
+       music       1.00      0.88      0.93         8
+        name       0.00      0.00      0.00         7
+        news       0.83      0.83      0.83         6
+status_check       0.00      0.00      0.00         6
+      thanks       1.00      1.00      1.00        10
+        time       0.88      1.00      0.93         7
+     weather       1.00      0.71      0.83         7
+
+    accuracy                           0.63       129
+   macro avg       0.73      0.58      0.59       129
+weighted avg       0.73      0.63      0.62       129
+
+2025-08-07 12:42:59,071 - model.intent_classifier - INFO - SVM model and vectorizer saved successfully.
+2025-08-07 12:42:59,072 - __main__ - INFO - Model retraining completed successfully.

@@ -49,8 +49,10 @@ class Config:
     # ==================== GUI CONFIG ====================
     GUI_WIDTH = 800
     GUI_HEIGHT = 600
-    
+    GUI_title = "Intelligent Chatbot"
     # GUI Themes
+
+
     THEMES = {
         "light": {
             "window_bg": "#f0f0f0",
@@ -81,3 +83,17 @@ class Config:
     LOG_FILE_PREFIX = "app"
     LOG_LEVEL = "INFO" # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
     LOG_ROTATION_SIZE_MB = 10
+
+    # Add to Config class:
+
+    def load_from_env(self):
+        self.MODEL_TYPE = os.getenv("MODEL_TYPE", self.MODEL_TYPE)
+        self.LOG_LEVEL = os.getenv("LOG_LEVEL", self.LOG_LEVEL)
+        self.BERT_MODEL_PATH = os.getenv("BERT_MODEL_PATH", self.BERT_MODEL_PATH)
+        self.BERT_BATCH_SIZE = int(os.getenv("BERT_BATCH_SIZE", self.BERT_BATCH_SIZE))
+        self.BERT_EPOCHS = int(os.getenv("BERT_EPOCHS", self.BERT_EPOCHS))
+        self.BERT_LEARNING_RATE = float(os.getenv("BERT_LEARNING_RATE", self.BERT_LEARNING_RATE))
+
+    def __init__(self):
+        self.load_from_env()  # Call first to allow overrides
+        # The rest of your existing config stays the same

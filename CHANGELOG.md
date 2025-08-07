@@ -5,15 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
+
 ## [Unreleased]
 
 ### Planned
-- BERT model implementation for enhanced accuracy
 - Data augmentation techniques
-- Cross-validation for better performance metrics
 - Advanced GUI features (typing indicators, timestamps)
 - Unit and integration tests
 - Performance monitoring and analytics
+- API deployment with FastAPI
+- CI/CD integration via GitHub Actions
+
+---
+
+## [1.3.0] - 2025-08-07
+
+### Added
+- **Modular BERT classifier** (`bert_classifier.py`) using Hugging Face Transformers
+- **Dynamic model switching** (SVM/BERT) via `config.py` or environment variables
+- **Environment-aware `Config` class** with `load_from_env()` support
+- **Dataset inspection CLI** (`tools/data_stats.py`) for pattern stats and imbalance warnings
+- **Training report logging** including accuracy and classification report for both models
+
+### Changed
+- Refactored `intent_classifier.py` to act as a factory delegating to SVM or BERT
+- Extracted BERT logic from monolithic structure to separate class
+- Reused vectorizer path (`vectorizer.pkl`) for label map in BERT classifier
+- Streamlined preprocessing and ensured compatibility with both SVM and BERT
+
+### Improved
+- Fully compatible retraining from GUI for both SVM and BERT
+- Better logging with loss per epoch, evaluation report, and device info
+- Smarter model loading fallback — retrains if model file is missing or corrupted
+
+### Security
+- Improved model and file error handling
+- Safe tokenization and confidence filtering for BERT inference
+- Validated intent prediction to avoid index out-of-bounds on malformed inputs
+
+### Performance
+- Enabled GPU acceleration for BERT (auto-detection)
+- More efficient training with PyTorch DataLoader batching
+- Faster switching and execution via unified intent interface
+
+---
 
 ## [1.2.0] - 2025-08-04
 
@@ -55,6 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved robustness** with confidence scoring and fallback handling
 - **Enhanced user experience** with more intents and better responses
 
+---
+
 ## [1.1.0] - 2025-08-04
 
 ### Added
@@ -70,4 +108,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Model accuracy: ~33% (needs improvement)
 - Support for 13 different intents
 - TF-IDF vectorization for text processing
-- NLTK integration for text preprocessing 
+- NLTK integration for text preprocessing
