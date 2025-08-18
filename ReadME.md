@@ -113,9 +113,9 @@ This project is open-source under the MIT License. Feel free to fork, modify, an
 
 ## 🙌 Credits
 
-Crafted with ❤️ by Final Year Engineering Students — Aaryaksh , Hrishi, Bhavay , Bhavya 
+Crafted with ❤️ by Final Year AI & DS Engineering Students — Aaryaksh , Hrishi, Bhavay , Bhavya 
 
-Project Guide: *Er. Amit Tewari*, Associate Professor, Dept. of CSE, Arya College of Engineering & I.T.
+Project Guide: *Er. Amit Kumar Tewari*, Associate Professor, Dept. of CSE, Arya College of Engineering & I.T.
 
 ---
 
