@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Remote Chatbot Client</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Remote Chatbot</h1>
+      <div class="config">
+        <input id="api-base" type="text" placeholder="Enter API Base URL" />
+        <input id="api-key" type="password" placeholder="Enter API Key" />
+        <button id="save-config">Save</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="chat" class="chat"></div>
+    </main>
+
+    <footer>
+      <input id="message" type="text" placeholder="Type your message..." />
+      <button id="send">Send</button>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+venv/
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Data and models
+*.pkl
+*.h5
+*.csv
+*.json
+
+# Models
+model/svm/
+model/bert/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+
+# Ignore conversation history
+conversations.json
+
+# Ignore config secrets
+config.pyc
+
+# Ignore test outputs
+*.out
+
