@@ -1,4 +1,3 @@
-
 # ==============================================================================
 # model/response_handler.py
 # A class for handling chatbot responses.
@@ -61,7 +60,11 @@ class ResponseHandler:
         if intent_tag in ("unknown", "no_match"):
             logger.warning(f"Unknown intent detected. Logging query for retraining.")
             self._log_unmatched_query(context[-1]['text'] if context else "unknown_query")
-            return random.choice(self.default_responses)
+            if self.config.ENABLE_GOOGLE_FALLBACK:
+                logger.info("Unknown intent, falling back to Google Search.")
+                return self.google_fallback(context)
+            else:
+                return random.choice(self.default_responses)
         
         # Handle explicit default tag without warning
         if intent_tag == 'default':
@@ -76,39 +79,44 @@ class ResponseHandler:
                 'response': responses
             })
             return random.choice(responses)
-        # Google fallback if enabled and no local response
+
+        # If no local response, fallback to Google
         if self.config.ENABLE_GOOGLE_FALLBACK:
-            logger.info({
-                'event': 'response_source',
-                'source': 'google_fallback',
-                'intent_tag': intent_tag
-            })
-            user_query = context[-1]['text'] if context else ""
-            import asyncio
-            from utils.web_search import query_google
-            loop = asyncio.get_event_loop()
-            try:
-                google_results = loop.run_until_complete(self._get_google_results_with_retry(user_query))
-                structured_response = self._merge_google_results(user_query, google_results)
-                logger.info({
-                    'event': 'google_fallback_response',
-                    'query': user_query,
-                    'results': google_results
-                })
-                return structured_response
-            except Exception as e:
-                logger.error({
-                    'event': 'google_fallback_error',
-                    'query': user_query,
-                    'error': str(e)
-                })
-                return random.choice(self.default_responses)
+            return self.google_fallback(context)
+
         logger.warning({
             'event': 'response_source',
             'source': 'default',
             'intent_tag': intent_tag
         })
         return random.choice(self.default_responses)
+
+    def google_fallback(self, context):
+        """Performs a Google search and returns the results."""
+        logger.info({
+            'event': 'response_source',
+            'source': 'google_fallback'
+        })
+        user_query = context[-1]['text'] if context else ""
+        import asyncio
+        from utils.web_search import query_google
+        loop = asyncio.get_event_loop()
+        try:
+            google_results = loop.run_until_complete(self._get_google_results_with_retry(user_query))
+            structured_response = self._merge_google_results(user_query, google_results)
+            logger.info({
+                'event': 'google_fallback_response',
+                'query': user_query,
+                'results': google_results
+            })
+            return structured_response
+        except Exception as e:
+            logger.error({
+                'event': 'google_fallback_error',
+                'query': user_query,
+                'error': str(e)
+            })
+            return random.choice(self.default_responses)
 
     async def _get_google_results_with_retry(self, query, retries=2):
         for attempt in range(retries + 1):
