@@ -114,28 +114,22 @@ class ChatbotApp:
         
         Args:
             user_input (str): The raw text input from the user.
-            
+        
         Returns:
             str: The chatbot's response.
         """
         if not user_input.strip():
             return "Please type something to start our conversation."
 
-        # Add user query to context
         self.context_handler.add_user_query(user_input)
-        
-        # 1. Preprocess the user input
         preprocessed_text = self.preprocessor.preprocess(user_input)
-        
-        # 2. Classify the intent
-        predicted_intent = self.intent_classifier.predict_intent(preprocessed_text)
-        
-        # 3. Generate a response
+        try:
+            predicted_intent = self.intent_classifier.predict_intent(preprocessed_text)
+        except Exception as e:
+            logger.error(f"Prediction error: {e}")
+            return "Sorry, I'm having trouble understanding right now."
         response = self.response_handler.get_response(predicted_intent, self.context_handler.get_context())
-        
-        # Add bot response to context
         self.context_handler.add_bot_response(response)
-        
         return response
 
     # ==================== API KEYS ====================
@@ -247,22 +241,40 @@ class ChatbotApp:
         except Exception:
             pass
 
-    def retrain_model(self):
+    def retrain_model(self, background=False):
         """
-        Retrains the intent classification model using the data file.
+        Retrains the intent classification model. If background=True, runs in a separate thread and hot-swaps model on completion.
         """
-        logger.info("Retraining command received. Starting model retraining...")
-        try:
-            # Rebuild classifier according to current config.MODEL_TYPE
-            self.intent_classifier = IntentClassifier(self.config)
-            self.intent_classifier.train_model(self.data, self.preprocessor)
-            logger.info("Model retraining completed successfully.")
-            if self.gui:
-                self.gui.display_message("Bot", "Model has been successfully retrained!")
-        except Exception as e:
-            logger.error(f"An error occurred during model retraining: {e}", exc_info=True)
-            if self.gui:
-                self.gui.display_message("Bot", "An error occurred while retraining the model. Please check the logs.")
+        def _retrain():
+            logger.info("[Retrain] Background retraining started...")
+            try:
+                new_classifier = IntentClassifier(self.config)
+                new_classifier.train_model(self.data, self.preprocessor)
+                logger.info("[Retrain] Model retraining completed. Hot-swapping model.")
+                self.intent_classifier = new_classifier
+                if self.gui:
+                    self.gui.display_message("Bot", "Model retrained and updated in background!")
+            except Exception as e:
+                logger.error(f"[Retrain] Error during background retraining: {e}", exc_info=True)
+                if self.gui:
+                    self.gui.display_message("Bot", "Background retraining failed. See logs.")
+
+        if background:
+            logger.info("[Retrain] Initiating background retraining...")
+            retrain_thread = threading.Thread(target=_retrain, daemon=True)
+            retrain_thread.start()
+        else:
+            logger.info("Retraining command received. Starting model retraining...")
+            try:
+                self.intent_classifier = IntentClassifier(self.config)
+                self.intent_classifier.train_model(self.data, self.preprocessor)
+                logger.info("Model retraining completed successfully.")
+                if self.gui:
+                    self.gui.display_message("Bot", "Model has been successfully retrained!")
+            except Exception as e:
+                logger.error(f"An error occurred during model retraining: {e}", exc_info=True)
+                if self.gui:
+                    self.gui.display_message("Bot", "An error occurred while retraining the model. Please check the logs.")
 
 
     def get_sessions_dir(self):

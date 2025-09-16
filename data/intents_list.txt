@@ -4,7 +4,7 @@
     {
       "tag": "greeting, goodbye, thanks, name, about_bot, help,
        joke, creator, age, status_check, apology, compliment, feedback,
-        Weather, time, music, news, nomatch,"
+        Weather, time, music, news, default,"
 
       "patterns": [atleast 10 ],
 

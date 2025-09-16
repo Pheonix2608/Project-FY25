@@ -1,3 +1,11 @@
+## September 2025: Google Fallback & Async Search
+
+- Added ENABLE_GOOGLE_FALLBACK toggle in config.py for runtime control
+- Created async Google search module (utils/web_search.py) with caching and rate-limiting
+- Integrated fallback logic in ResponseHandler for seamless online search
+- Enhanced GUI to show fallback notice without blocking user interaction
+- Made max results and cache duration configurable
+- Implemented structured logging for all fallback and search events
 # Project Improvements and Debug Report
 
 ## Issues Found and Fixed

@@ -312,10 +312,21 @@ class ChatbotGUI(QWidget):
         QTimer.singleShot(1000, lambda: self.generate_response(user_input))
 
     def generate_response(self, user_input):
-        """Gets response from bot and displays it."""
+        """Gets response from bot and displays it. Shows fallback notice if Google fallback is used."""
         response = self.app_instance.process_input(user_input)
         self.typing_label.clear()
+        # Detect Google fallback by marker in response
+        if isinstance(response, str) and response.startswith("(Google Fallback Results)"):
+            self.show_fallback_notice()
         self.display_message("Bot", response)
+
+    def show_fallback_notice(self):
+        """Displays a small non-blocking notice when Google fallback is used."""
+        notice = QLabel("Google fallback used for this response.")
+        notice.setStyleSheet("color: #007acc; font-size: 12px; background: #e0f7fa; border-radius: 4px; padding: 2px 8px;")
+        notice.setAlignment(Qt.AlignmentFlag.AlignRight)
+        # Add to chat display temporarily
+        self.chat_display.append("<span style='color:#007acc; font-size:12px;'>Google fallback used for this response.</span>")
 
     def switch_model(self, new_model):
         """Handles logic for switching between different model types."""

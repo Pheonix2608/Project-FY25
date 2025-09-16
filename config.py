@@ -47,6 +47,12 @@ class Config:
     
     # Enable generative model response hook
     ENABLE_GENERATIVE_RESPONSE = False
+    # Enable Google fallback for online search
+    ENABLE_GOOGLE_FALLBACK = True
+    # Maximum number of Google results to fetch per query
+    GOOGLE_MAX_RESULTS = 5
+    # Cache duration for Google search results (in seconds)
+    GOOGLE_CACHE_DURATION = 3600
 
     # ==================== GUI CONFIG ====================
     GUI_WIDTH = 800
@@ -100,7 +106,18 @@ class Config:
         # API server
         self.API_HOST = os.getenv("API_HOST", getattr(self, 'API_HOST', '127.0.0.1'))
         self.API_PORT = int(os.getenv("API_PORT", getattr(self, 'API_PORT', 8080)))
+        # Allow toggling Google fallback and related settings at runtime
+        self.ENABLE_GOOGLE_FALLBACK = self._get_bool_env("ENABLE_GOOGLE_FALLBACK", self.ENABLE_GOOGLE_FALLBACK)
+        self.GOOGLE_MAX_RESULTS = int(os.getenv("GOOGLE_MAX_RESULTS", self.GOOGLE_MAX_RESULTS))
+        self.GOOGLE_CACHE_DURATION = int(os.getenv("GOOGLE_CACHE_DURATION", self.GOOGLE_CACHE_DURATION))
 
     def __init__(self):
         self.load_from_env()  # Call first to allow overrides
         # The rest of your existing config stays the same
+
+        @staticmethod
+        def _get_bool_env(var, default):
+            val = os.getenv(var)
+            if val is None:
+                return default
+            return val.lower() in ("1", "true", "yes", "on")

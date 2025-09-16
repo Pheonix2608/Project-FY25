@@ -68,10 +68,67 @@ class ResponseHandler:
 
         responses = self.response_map.get(intent_tag)
         if responses:
+            logger.info({
+                'event': 'response_source',
+                'source': 'local',
+                'intent_tag': intent_tag,
+                'response': responses
+            })
             return random.choice(responses)
-        else:
-            logger.warning(f"No responses found for intent: '{intent_tag}'. Falling back to default.")
-            return random.choice(self.default_responses)
+        # Google fallback if enabled and no local response
+        if self.config.ENABLE_GOOGLE_FALLBACK:
+            logger.info({
+                'event': 'response_source',
+                'source': 'google_fallback',
+                'intent_tag': intent_tag
+            })
+            user_query = context[-1]['text'] if context else ""
+            import asyncio
+            from utils.web_search import query_google
+            loop = asyncio.get_event_loop()
+            try:
+                google_results = loop.run_until_complete(self._get_google_results_with_retry(user_query))
+                structured_response = self._merge_google_results(user_query, google_results)
+                logger.info({
+                    'event': 'google_fallback_response',
+                    'query': user_query,
+                    'results': google_results
+                })
+                return structured_response
+            except Exception as e:
+                logger.error({
+                    'event': 'google_fallback_error',
+                    'query': user_query,
+                    'error': str(e)
+                })
+                return random.choice(self.default_responses)
+        logger.warning({
+            'event': 'response_source',
+            'source': 'default',
+            'intent_tag': intent_tag
+        })
+        return random.choice(self.default_responses)
+
+    async def _get_google_results_with_retry(self, query, retries=2):
+        for attempt in range(retries + 1):
+            try:
+                from utils.web_search import query_google
+                return await query_google(query)
+            except Exception as e:
+                logger.warning(f"Google search attempt {attempt+1} failed: {e}")
+                import asyncio
+                await asyncio.sleep(1)
+        raise Exception("All Google search attempts failed.")
+
+    def _merge_google_results(self, query, results):
+        """
+        Merge Google results into a structured response string.
+        """
+        if not results:
+            return "Sorry, I couldn't find an answer online."
+        notice = "(Google Fallback Results)\n"
+        merged = notice + f"Top results for '{query}':\n" + "\n".join(f"- {r}" for r in results)
+        return merged
 
     def _log_unmatched_query(self, query):
         """

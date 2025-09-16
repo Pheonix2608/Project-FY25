@@ -1,3 +1,10 @@
+## [1.3.0] - 2025-09-11
+### Added
+- Google fallback integration for chatbot responses
+- Async Google search module with caching and rate-limiting
+- Configurable max results and cache duration for Google search
+- Structured logging for query source and fallback usage
+- GUI notice for Google fallback responses
 # Changelog
 
 All notable changes to this project will be documented in this file.
