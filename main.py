@@ -21,7 +21,7 @@ from utils.data_loader import load_all_intents
 from model.intent_classifier import IntentClassifier
 from model.response_handler import ResponseHandler
 from model.context_handler import ContextHandler
-from gui.chatbot_gui import ChatbotGUI
+from admin.panel import AdminPanel
 from utils.api_key_manager import APIKeyManager
 
 # Initialize logger for the main module
@@ -67,11 +67,8 @@ class ChatbotApp:
 
         # Initialize GUI
         self.app = QApplication(sys.argv)
-        self.gui = ChatbotGUI(self)
-        self.gui.setWindowTitle(f"{self.config.PROJECT_NAME} v{self.config.VERSION}")
-        
-        # Load conversation history if it exists
-        self.load_history()
+        self.gui = AdminPanel(self)
+        self.gui.setWindowTitle(f"{self.config.PROJECT_NAME} v{self.config.VERSION} - Admin Panel")
         
         self.gui.show()
         
@@ -116,21 +113,23 @@ class ChatbotApp:
             user_input (str): The raw text input from the user.
         
         Returns:
-            str: The chatbot's response.
+            dict: A dictionary containing the response and other metadata.
         """
         if not user_input.strip():
-            return "Please type something to start our conversation."
+            return {"response": "Please type something to start our conversation.", "intent": "none", "confidence": 1.0}
 
         self.context_handler.add_user_query(user_input)
         preprocessed_text = self.preprocessor.preprocess(user_input)
         try:
-            predicted_intent = self.intent_classifier.predict_intent(preprocessed_text)
+            predicted_intent, confidence = self.intent_classifier.predict_intent(preprocessed_text)
         except Exception as e:
             logger.error(f"Prediction error: {e}")
-            return "Sorry, I'm having trouble understanding right now."
-        response = self.response_handler.get_response(predicted_intent, self.context_handler.get_context())
+            return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0}
+
+        response = self.response_handler.get_response(predicted_intent, confidence, self.context_handler.get_context())
         self.context_handler.add_bot_response(response)
-        return response
+
+        return {"response": response, "intent": predicted_intent, "confidence": confidence}
 
     # ==================== API KEYS ====================
     def generate_api_key(self, user_id: str = "default_user") -> str:
@@ -211,10 +210,16 @@ class ChatbotApp:
                         return self._send_json(403, {"error": "Invalid or expired API key"})
 
                     # Process input using the app's pipeline
-                    response_text = app_ref.process_input(message)
+                    response_data = app_ref.process_input(message)
+
+                    # Log the API session
+                    app_ref.log_api_session(user_id, message, response_data)
+
                     return self._send_json(200, {
                         "user_id": user_id,
-                        "response": response_text
+                        "response": response_data.get("response"),
+                        "intent": response_data.get("intent"),
+                        "confidence": response_data.get("confidence")
                     })
                 except Exception as e:
                     logger.error(f"API error: {e}")
@@ -240,6 +245,31 @@ class ChatbotApp:
                 self._httpd = None
         except Exception:
             pass
+
+    def log_api_session(self, user_id, message, response_data):
+        """Logs an API session to a file."""
+        log_file = os.path.join(self.config.BASE_DIR, 'data', 'api_sessions.json')
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "user_id": user_id,
+            "message": message,
+            "response": response_data.get("response"),
+            "intent": response_data.get("intent"),
+            "confidence": response_data.get("confidence")
+        }
+
+        try:
+            logs = []
+            if os.path.exists(log_file):
+                with open(log_file, 'r') as f:
+                    logs = json.load(f)
+
+            logs.append(log_entry)
+
+            with open(log_file, 'w') as f:
+                json.dump(logs, f, indent=4)
+        except Exception as e:
+            logger.error(f"Failed to log API session: {e}", exc_info=True)
 
     def retrain_model(self, background=False):
         """

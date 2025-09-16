@@ -36,18 +36,19 @@ class ResponseHandler:
         }
         logger.info("Response handler initialized with rules-based responses.")
 
-    def get_response(self, intent_tag, context):
+    def get_response(self, intent_tag, confidence, context):
         """
         Retrieves a random response for a given intent tag.
         
         Args:
             intent_tag (str): The predicted intent tag from the classifier.
+            confidence (float): The confidence score of the prediction.
             context (list): A list of recent queries and responses.
             
         Returns:
             str: A randomly selected response string.
         """
-        logger.info(f"Getting response for intent '{intent_tag}' with context: {context}")
+        logger.info(f"Getting response for intent '{intent_tag}' with confidence {confidence:.2f} and context: {context}")
         
         # ----- Hooks for advanced generation (future) -----
         if self.config.ENABLE_GENERATIVE_RESPONSE:

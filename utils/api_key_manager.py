@@ -80,3 +80,33 @@ class APIKeyManager:
                 "calls_per_day": calls_per_day
             }
             self._save_api_keys(api_keys)
+
+    def list_all_api_keys(self) -> Dict:
+        """Returns a dictionary of all API keys with their metadata, excluding the key hash."""
+        api_keys = self._load_api_keys()
+        keys_to_return = {}
+        for user_id, data in api_keys.items():
+            keys_to_return[user_id] = {
+                "created_at": data.get("created_at"),
+                "expires_at": data.get("expires_at"),
+                "rate_limit": data.get("rate_limit")
+            }
+        return keys_to_return
+
+    def delete_api_key(self, user_id: str) -> bool:
+        """Deletes an API key for a given user_id. Returns True if successful."""
+        api_keys = self._load_api_keys()
+        if user_id in api_keys:
+            del api_keys[user_id]
+            self._save_api_keys(api_keys)
+            return True
+        return False
+
+    def modify_api_key_user(self, old_user_id: str, new_user_id: str) -> bool:
+        """Modifies the user_id for an existing API key. Returns True if successful."""
+        api_keys = self._load_api_keys()
+        if old_user_id in api_keys and new_user_id not in api_keys:
+            api_keys[new_user_id] = api_keys.pop(old_user_id)
+            self._save_api_keys(api_keys)
+            return True
+        return False

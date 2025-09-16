@@ -9,7 +9,6 @@ torch>=1.13.0
 transformers>=4.21.0
 
 # Text processing
-wordnet>=3.0
 
 # Development and testing
 pytest>=7.0.0

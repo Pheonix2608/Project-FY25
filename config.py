@@ -115,9 +115,9 @@ class Config:
         self.load_from_env()  # Call first to allow overrides
         # The rest of your existing config stays the same
 
-        @staticmethod
-        def _get_bool_env(var, default):
-            val = os.getenv(var)
-            if val is None:
-                return default
-            return val.lower() in ("1", "true", "yes", "on")
+    @staticmethod
+    def _get_bool_env(var, default):
+        val = os.getenv(var)
+        if val is None:
+            return default
+        return val.lower() in ("1", "true", "yes", "on")

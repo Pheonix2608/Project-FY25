@@ -1,4 +1,3 @@
-
 # ==============================================================================
 # model/intent_classifier.py
 # Intent classification module with a factory pattern for different models.
@@ -159,27 +158,27 @@ class SVMIntentClassifier:
     def predict_intent(self, preprocessed_tokens):
         if not self.model or not self.vectorizer:
             logger.error("SVM model is not loaded. Cannot predict.")
-            return 'unknown'
+            return 'unknown', 0.0
         
         text = " ".join(preprocessed_tokens)
         if not text.strip():
-            return 'default'
+            return 'default', 1.0
 
         vectorized_text = self.vectorizer.transform([text])
         
         # Get prediction and confidence score
         predicted_intent = self.model.predict(vectorized_text)[0]
         confidence_scores = self.model.predict_proba(vectorized_text)[0]
-        max_confidence = max(confidence_scores)
+        max_confidence = float(np.max(confidence_scores))
         
         logger.info(f"Predicted intent (SVM): '{predicted_intent}' with confidence: {max_confidence:.3f}")
         
         # If confidence is too low, return 'no_match'
         if max_confidence < 0.3:
             logger.info(f"Low confidence ({max_confidence:.3f}), returning 'no_match'")
-            return 'no_match'
+            return 'no_match', max_confidence
         
-        return predicted_intent
+        return predicted_intent, max_confidence
 
 class BertIntentClassifier:
     """
@@ -308,11 +307,11 @@ class BertIntentClassifier:
     def predict_intent(self, preprocessed_tokens):
         if not self.model:
             logger.error("BERT model is not loaded. Cannot predict.")
-            return 'unknown'
+            return 'unknown', 0.0
         
         text = " ".join(preprocessed_tokens)
         if not text.strip():
-            return 'default'
+            return 'default', 1.0
 
         encoding = self.tokenizer.encode_plus(
             text,
@@ -328,12 +327,20 @@ class BertIntentClassifier:
         with torch.no_grad():
             outputs = self.model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
-        
-        prediction = torch.argmax(logits, dim=1).item()
+
+        probabilities = torch.softmax(logits, dim=1)
+        max_confidence, prediction = torch.max(probabilities, dim=1)
+        max_confidence = max_confidence.item()
+        prediction = prediction.item()
+
         predicted_intent = self.intents[prediction]
-        logger.info(f"Predicted intent (BERT): '{predicted_intent}'")
-        
-        return predicted_intent
+        logger.info(f"Predicted intent (BERT): '{predicted_intent}' with confidence: {max_confidence:.3f}")
+
+        if max_confidence < 0.3:
+            logger.info(f"Low confidence ({max_confidence:.3f}), returning 'no_match'")
+            return 'no_match', max_confidence
+
+        return predicted_intent, max_confidence
 
 class IntentDataset(Dataset):
     """

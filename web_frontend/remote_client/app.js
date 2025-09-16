@@ -6,6 +6,8 @@
   const apiKeyInput = document.getElementById('api-key');
   const saveBtn = document.getElementById('save-config');
 
+  let typingIndicator;
+
   // Load saved config
   const saved = JSON.parse(localStorage.getItem('remote_chat_config') || '{}');
   if (saved.base) apiBaseInput.value = saved.base;
@@ -25,12 +27,32 @@
     chat.scrollTop = chat.scrollHeight;
   }
 
-  function appendBot(text) {
+  function appendBot(text, intent, confidence) {
     const el = document.createElement('div');
     el.className = 'message bot';
-    el.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+    let content = escapeHtml(text);
+    if (intent && confidence !== undefined) {
+      content += `<div class="confidence">Intent: ${escapeHtml(intent)} (${(confidence * 100).toFixed(1)}%)</div>`;
+    }
+    el.innerHTML = `<div class="bubble">${content}</div>`;
     chat.appendChild(el);
     chat.scrollTop = chat.scrollHeight;
+  }
+
+  function showTypingIndicator() {
+    if (typingIndicator) return;
+    typingIndicator = document.createElement('div');
+    typingIndicator.className = 'message bot';
+    typingIndicator.innerHTML = `<div class="bubble typing"><span></span><span></span><span></span></div>`;
+    chat.appendChild(typingIndicator);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function hideTypingIndicator() {
+    if (typingIndicator) {
+      chat.removeChild(typingIndicator);
+      typingIndicator = null;
+    }
   }
 
   function escapeHtml(unsafe) {
@@ -57,6 +79,7 @@
     if (!text) return;
     appendUser(text);
     input.value = '';
+    showTypingIndicator();
 
     let base = apiBaseInput.value.trim();
     let key = apiKeyInput.value.trim();
@@ -72,6 +95,7 @@
     base = normalizeBase(base);
 
     if (!base || !key) {
+      hideTypingIndicator();
       appendBot('Please set API Base URL and API Key.');
       return;
     }
@@ -85,6 +109,7 @@
         },
         body: JSON.stringify({ message: text })
       });
+      hideTypingIndicator();
       if (!res.ok) {
         let errText = `HTTP ${res.status}`;
         try {
@@ -102,8 +127,9 @@
         return;
       }
       const data = await res.json();
-      appendBot(data.response || '(no response)');
+      appendBot(data.response || '(no response)', data.intent, data.confidence);
     } catch (e) {
+      hideTypingIndicator();
       appendBot(`Network error. Check API Base URL and connectivity. Details: ${e && e.message ? e.message : e}`);
     }
   }
