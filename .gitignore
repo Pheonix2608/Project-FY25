@@ -22,8 +22,7 @@ logs/
 # Data and models
 *.pkl
 *.h5
-*.csv
-*.json
+
 
 # Models
 model/svm/

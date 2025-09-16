@@ -1,0 +1,724 @@
+{
+  "intents": [
+    {
+      "tag": "flight_booking",
+      "patterns": [
+        "I want to book a flight",
+        "Book a flight to New York",
+        "Reserve a plane ticket",
+        "How do I book a flight?",
+        "Find flights to London",
+        "Flight reservation for two people",
+        "Cheap flight tickets to Paris",
+        "Book a round-trip flight",
+        "Can you book a flight for me?",
+        "Flight booking for next week"
+      ],
+      "responses": [
+        "You can book flights using our portal by selecting your destination, dates, and number of passengers."
+      ]
+    },
+    {
+      "tag": "train_booking",
+      "patterns": [
+        "Book a train ticket to Mumbai",
+        "Reserve seats on a train",
+        "Train booking for tomorrow",
+        "How do I book a train?",
+        "Check train availability",
+        "Ticket reservation for Chennai",
+        "Book sleeper class train ticket",
+        "Can I book multiple train tickets?",
+        "Train schedule and booking",
+        "Train ticket for family"
+      ],
+      "responses": [
+        "You can book train tickets through our train booking system by selecting the route, class, and date of travel."
+      ]
+    },
+    {
+      "tag": "hotel_booking",
+      "patterns": [
+        "Book a hotel in Delhi",
+        "Reserve a room in a 5-star hotel",
+        "Hotel booking for weekend",
+        "Find cheap hotels in Paris",
+        "I need a hotel near the airport",
+        "Book multiple rooms",
+        "Hotel reservation for 3 nights",
+        "Can you find a hotel with Wi-Fi?",
+        "Luxury hotel booking",
+        "Hotel check-in tomorrow"
+      ],
+      "responses": [
+        "You can book hotels using our portal by entering your destination, dates, and room preferences."
+      ]
+    },
+    {
+      "tag": "bus_booking",
+      "patterns": [
+        "Book a bus ticket",
+        "Reserve seats on a bus to Jaipur",
+        "Bus booking for next Monday",
+        "Check bus availability",
+        "Bus ticket reservation for family",
+        "Book AC bus tickets",
+        "Can I book sleeper bus tickets?",
+        "Bus timings and booking",
+        "Cheap bus tickets to Bangalore",
+        "Book a local bus ride"
+      ],
+      "responses": [
+        "Bus tickets can be booked online by selecting your route, date, and seat type."
+      ]
+    },
+    {
+      "tag": "car_booking",
+      "patterns": [
+        "I want to book a taxi",
+        "Reserve a rental car",
+        "Car booking for 5 days",
+        "Book a cab to airport",
+        "Luxury car rental",
+        "Find available cars nearby",
+        "Hire a car with driver",
+        "Book a car for city tour",
+        "Car rental for weekend",
+        "Can you arrange a car pickup?"
+      ],
+      "responses": [
+        "You can book a car or taxi through our platform by selecting pickup location, dates, and car type."
+      ]
+    },
+    {
+      "tag": "cruise_booking",
+      "patterns": [
+        "Book a cruise trip",
+        "Reserve a cabin on a cruise",
+        "Cruise tickets to the Bahamas",
+        "Luxury cruise booking",
+        "Check cruise availability",
+        "Family cruise reservation",
+        "Book a weekend cruise",
+        "Can I book multiple cabins?",
+        "Cruise package for honeymoon",
+        "Cruise booking online"
+      ],
+      "responses": [
+        "Cruise bookings are available on our travel portal. Select the cruise package, dates, and number of passengers."
+      ]
+    },
+    {
+      "tag": "booking_modification",
+      "patterns": [
+        "Change my flight date",
+        "Modify hotel reservation",
+        "Update train booking",
+        "Can I change my ticket?",
+        "Reschedule my travel plan",
+        "Update passenger details",
+        "Change bus booking",
+        "Modify car rental dates",
+        "Update cruise cabin reservation",
+        "Alter flight destination"
+      ],
+      "responses": [
+        "You can modify your bookings through the 'Manage Booking' section of the portal by selecting your reservation and desired changes."
+      ]
+    },
+    {
+      "tag": "booking_cancellation",
+      "patterns": [
+        "Cancel my flight ticket",
+        "How to cancel hotel booking?",
+        "Cancel train reservation",
+        "I want to cancel my bus ticket",
+        "Cancel car rental",
+        "Refund for canceled cruise",
+        "Cancel multiple bookings",
+        "Cancel booking for tomorrow",
+        "Flight cancellation process",
+        "Hotel cancellation policy"
+      ],
+      "responses": [
+        "Bookings can be canceled online via the portal. Refunds depend on the booking type and cancellation policy."
+      ]
+    },
+    {
+      "tag": "payment_refund",
+      "patterns": [
+        "Make payment for my flight",
+        "Refund for canceled hotel",
+        "Payment options for bookings",
+        "Check transaction status",
+        "How to pay for bus tickets?",
+        "Cancel and refund procedure",
+        "Payment methods accepted",
+        "Check refund timeline",
+        "Online payment not working",
+        "Refund request for cruise"
+      ],
+      "responses": [
+        "Payments can be made via credit/debit cards, net banking, or UPI. Refunds are processed according to the cancellation policy."
+      ]
+    },
+    {
+      "tag": "travel_insurance",
+      "patterns": [
+        "Add travel insurance",
+        "Insurance for flight ticket",
+        "Cancel my travel insurance",
+        "Check insurance coverage",
+        "Travel insurance options",
+        "How much is travel insurance?",
+        "Include insurance for hotel booking",
+        "Refund insurance premium",
+        "Insurance claims procedure",
+        "Online travel insurance purchase"
+      ],
+      "responses": [
+        "Travel insurance can be added during booking. Coverage details and claims process are available on the portal."
+      ]
+    },
+    {
+      "tag": "destination_info",
+      "patterns": [
+        "Tell me about Paris",
+        "Tourist attractions in London",
+        "Famous landmarks in New York",
+        "Weather in Tokyo next week",
+        "Best time to visit Dubai",
+        "City guide for Sydney",
+        "Top restaurants in Rome",
+        "Local culture in Barcelona",
+        "Travel tips for Singapore",
+        "Sightseeing options in Amsterdam"
+      ],
+      "responses": [
+        "You can find destination information including landmarks, weather, attractions, and cultural tips on our travel portal."
+      ]
+    },
+    {
+      "tag": "trip_packages",
+      "patterns": [
+        "Show me tour packages",
+        "Family holiday packages",
+        "Adventure travel package",
+        "Budget travel options",
+        "Luxury trip packages",
+        "Weekend getaway packages",
+        "Honeymoon travel packages",
+        "All-inclusive tour deals",
+        "City sightseeing packages",
+        "Custom travel packages"
+      ],
+      "responses": [
+        "Trip packages are available on our portal. You can filter by budget, duration, and type of experience."
+      ]
+    },
+    {
+      "tag": "sightseeing_suggestions",
+      "patterns": [
+        "Best places to see in Paris",
+        "Must-visit attractions in London",
+        "Top sightseeing spots in New York",
+        "What to do in Tokyo?",
+        "Tourist guide for Dubai",
+        "Popular museums in Rome",
+        "City highlights in Amsterdam",
+        "Local attractions in Barcelona",
+        "Historical sites in Cairo",
+        "Weekend sightseeing options"
+      ],
+      "responses": [
+        "We provide sightseeing suggestions for every destination including landmarks, museums, parks, and local attractions."
+      ]
+    },
+    {
+      "tag": "local_transport_info",
+      "patterns": [
+        "How to get around Paris?",
+        "Public transport in London",
+        "Metro map for New York",
+        "Taxi availability in Tokyo",
+        "Car rentals in Dubai",
+        "Bus routes in Rome",
+        "Airport transfer options",
+        "Local trains in Amsterdam",
+        "City cab services",
+        "Transport apps recommendation"
+      ],
+      "responses": [
+        "Local transport information including buses, trains, taxis, and car rentals is available for all major destinations."
+      ]
+    },
+    {
+      "tag": "travel_dates_duration",
+      "patterns": [
+        "Plan a 5-day trip to Paris",
+        "Travel duration to London",
+        "Best travel dates for Tokyo",
+        "Check flight dates for New York",
+        "Weekend trips near Dubai",
+        "Duration of city tour",
+        "Flexible travel dates",
+        "Trip length recommendation",
+        "Short-term travel options",
+        "Long-term vacation planning"
+      ],
+      "responses": [
+        "You can plan your trip by selecting desired dates and duration. The portal suggests best dates based on availability and pricing."
+      ]
+    },
+    {
+      "tag": "flight_status",
+      "patterns": [
+        "Check my flight status",
+        "Is flight AF123 on time?",
+        "Flight delayed today?",
+        "Flight arrival time",
+        "Flight departure schedule",
+        "Flight cancelled or not",
+        "Check boarding gate for flight",
+        "Flight timing updates",
+        "Track flight to London",
+        "Real-time flight status"
+      ],
+      "responses": [
+        "You can check real-time flight status, delays, and gate information through our portal or airline website."
+      ]
+    },
+    {
+      "tag": "train_status",
+      "patterns": [
+        "Check train PNR status",
+        "Is my train on time?",
+        "Train arrival time",
+        "Platform number for train",
+        "Train cancelled today?",
+        "Live train running status",
+        "Train departure updates",
+        "Track train to Mumbai",
+        "Check train delay info",
+        "Train timing updates online"
+      ],
+      "responses": [
+        "Live train status including arrival, departure, and platform info is available online via our portal or railway system."
+      ]
+    },
+    {
+      "tag": "gate_platform_info",
+      "patterns": [
+        "Which gate for flight to Paris?",
+        "Platform number for train 1234?",
+        "Gate info for departure",
+        "Check boarding gate",
+        "Train platform changes?",
+        "Flight gate updates",
+        "Gate and terminal info",
+        "Platform details online",
+        "Airport gate for next flight",
+        "Train arrival platform info"
+      ],
+      "responses": [
+        "You can check updated gate or platform information for flights and trains on our travel portal."
+      ]
+    },
+    {
+      "tag": "boarding_checkin",
+      "patterns": [
+        "Check-in for my flight",
+        "Online check-in available?",
+        "Boarding pass for tomorrow",
+        "Check-in for train ticket",
+        "Early check-in options",
+        "Mobile boarding pass",
+        "Airport check-in timing",
+        "Check-in counter info",
+        "Check-in for multiple passengers",
+        "Self check-in procedure"
+      ],
+      "responses": [
+        "Boarding and check-in options are available online or at the counter. Ensure you complete check-in before the deadline."
+      ]
+    },
+    {
+      "tag": "baggage_rules",
+      "patterns": [
+        "Baggage allowance for flight",
+        "Carry-on limit?",
+        "Checked baggage rules",
+        "Excess baggage fees",
+        "Luggage restrictions",
+        "Baggage weight limit",
+        "Flight baggage policy",
+        "Train luggage limit",
+        "Can I carry sports equipment?",
+        "Special baggage handling"
+      ],
+      "responses": [
+        "Baggage rules vary by airline or train. Check weight limits, allowed items, and fees on the portal or ticket details."
+      ]
+    },
+    {
+      "tag": "seat_selection",
+      "patterns": [
+        "Select window seat",
+        "Book aisle seat",
+        "Change seat on flight",
+        "Seat selection for train",
+        "Choose preferred seat",
+        "Seat upgrade options",
+        "Check available seats",
+        "Group seating arrangement",
+        "Seat booking online",
+        "Seat map for flight"
+      ],
+      "responses": [
+        "You can select or change seats during booking or through the 'Manage Booking' section on the portal."
+      ]
+    },
+    {
+      "tag": "meal_options",
+      "patterns": [
+        "Select in-flight meal",
+        "Special meal request",
+        "Train food menu",
+        "Dietary options on flight",
+        "Order meals for journey",
+        "Vegetarian meal preference",
+        "Child meal options",
+        "Gluten-free food request",
+        "Flight catering choices",
+        "Meal availability on train"
+      ],
+      "responses": [
+        "Meal options can be selected during booking. Special dietary requests should be submitted in advance."
+      ]
+    },
+    {
+      "tag": "travel_classes",
+      "patterns": [
+        "Business class booking",
+        "Economy class ticket",
+        "First class train seat",
+        "Upgrade travel class",
+        "Compare flight classes",
+        "Luxury cabin on cruise",
+        "Sleeper vs AC coach",
+        "Premium class options",
+        "Travel class change",
+        "Check available classes"
+      ],
+      "responses": [
+        "You can choose your travel class when booking flights, trains, or cruises. Upgrades may be available depending on availability."
+      ]
+    },
+    {
+      "tag": "frequent_flyer",
+      "patterns": [
+        "Check loyalty points",
+        "Frequent flyer program",
+        "Redeem miles for flight",
+        "Register for airline rewards",
+        "Flight points balance",
+        "Loyalty benefits",
+        "Status upgrade using points",
+        "Miles expiry information",
+        "Bonus points for bookings",
+        "Enroll in frequent flyer program"
+      ],
+      "responses": [
+        "Frequent flyer and loyalty program information is available through the airline portal. Points can be redeemed for upgrades or discounts."
+      ]
+    },
+    {
+      "tag": "airport_services",
+      "patterns": [
+        "Airport lounge access",
+        "Baggage assistance",
+        "Airport Wi-Fi availability",
+        "Lost & found desk",
+        "Airport shuttle info",
+        "Customs and immigration",
+        "Airport map online",
+        "Parking info at airport",
+        "Special assistance for disabled",
+        "Airport food and shops"
+      ],
+      "responses": [
+        "Airport services including lounges, Wi-Fi, and assistance are listed on the airport portal or info desks."
+      ]
+    },
+    {
+      "tag": "hotel_checkin_checkout",
+      "patterns": [
+        "Hotel check-in time",
+        "Check-out procedure",
+        "Late check-out request",
+        "Early check-in available?",
+        "Online hotel check-in",
+        "Room key collection",
+        "Front desk assistance",
+        "Express check-out option",
+        "Extend hotel stay",
+        "Hotel reception contact"
+      ],
+      "responses": [
+        "Check-in and check-out details are provided by the hotel. Online check-in may be available via the booking portal."
+      ]
+    },
+    {
+      "tag": "room_amenities",
+      "patterns": [
+        "Hotel room with Wi-Fi",
+        "Air conditioning in room",
+        "Include breakfast",
+        "Check minibar availability",
+        "Room with balcony",
+        "Hotel room facilities",
+        "View room photos online",
+        "Room service hours",
+        "Request extra bed",
+        "Accessibility features in room"
+      ],
+      "responses": [
+        "Hotel room amenities including Wi-Fi, breakfast, and other facilities can be selected during booking or requested at check-in."
+      ]
+    },
+    {
+      "tag": "hotel_policies",
+      "patterns": [
+        "Hotel cancellation policy",
+        "Refund rules",
+        "Pet policy",
+        "Smoking allowed in room?",
+        "Children stay policy",
+        "Late arrival policy",
+        "Hotel deposit rules",
+        "Booking modification policy",
+        "Check-in ID requirements",
+        "Hotel terms and conditions"
+      ],
+      "responses": [
+        "Hotel policies such as cancellation, check-in, and pet rules are provided on the booking portal."
+      ]
+    },
+    {
+      "tag": "nearby_restaurants",
+      "patterns": [
+        "Restaurants near my hotel",
+        "Best local cafes",
+        "Food options around city center",
+        "Nearby vegetarian restaurants",
+        "Top-rated restaurants",
+        "Local food recommendations",
+        "Check restaurant menus",
+        "Book a table",
+        "Food delivery options",
+        "Restaurant opening hours"
+      ],
+      "responses": [
+        "You can find nearby restaurants and their menus via our portal or local maps."
+      ]
+    },
+    {
+      "tag": "emergency_contacts",
+      "patterns": [
+        "Local police number",
+        "Hospital contact",
+        "Emergency services",
+        "Lost passport help",
+        "Travel emergency contact",
+        "Fire department number",
+        "Roadside assistance",
+        "Embassy contact in city",
+        "Accident reporting",
+        "Medical emergency nearby"
+      ],
+      "responses": [
+        "Emergency contacts including medical, police, and roadside assistance are available in the travel portal or local directory."
+      ]
+    },
+    {
+      "tag": "weather_forecast",
+      "patterns": [
+        "Weather in Paris tomorrow",
+        "Temperature in London next week",
+        "Check rain probability in Tokyo",
+        "Weather updates for New York",
+        "Current weather in Dubai",
+        "Seasonal forecast for Rome",
+        "Humidity levels in Barcelona",
+        "Wind speed info",
+        "Weather alerts in city",
+        "Weekly forecast for travel destination"
+      ],
+      "responses": [
+        "Weather forecasts for destinations are available online and updated regularly. Check before planning your trip."
+      ]
+    },
+    {
+      "tag": "travel_safety",
+      "patterns": [
+        "Is it safe to travel to Egypt?",
+        "Travel advisory for India",
+        "COVID-19 restrictions in city",
+        "Safety tips for solo travelers",
+        "Emergency numbers in destination",
+        "High-risk areas warning",
+        "Local crime information",
+        "Health advisory for travelers",
+        "Travel insurance safety coverage",
+        "Security updates for tourists"
+      ],
+      "responses": [
+        "Travel safety information including advisories, health, and security tips are available on our portal and official travel websites."
+      ]
+    },
+    {
+      "tag": "lost_found",
+      "patterns": [
+        "Lost my luggage",
+        "Report a lost item",
+        "Found a wallet",
+        "Airport lost & found",
+        "Train station lost items",
+        "Lost passport help",
+        "Lost baggage report",
+        "How to track lost items?",
+        "Found items submission",
+        "Lost smartphone assistance"
+      ],
+      "responses": [
+        "Lost and found assistance is available at airports, train stations, and through the travel portal. Report items immediately."
+      ]
+    },
+    {
+      "tag": "travel_alerts",
+      "patterns": [
+        "Flight delay alerts",
+        "Train strike notifications",
+        "Weather alerts for trip",
+        "Travel advisory updates",
+        "Emergency travel notifications",
+        "Traffic alerts in city",
+        "Tourist attraction closures",
+        "Public transport alerts",
+        "Airport disruption info",
+        "Travel warnings"
+      ],
+      "responses": [
+        "Travel alerts and notifications are sent via email, SMS, or available on the portal for real-time updates."
+      ]
+    },
+    {
+      "tag": "group_travel",
+      "patterns": [
+        "Book group flight tickets",
+        "Group hotel reservation",
+        "Travel packages for teams",
+        "Group tour booking",
+        "Large family trip planning",
+        "Corporate travel bookings",
+        "Group transport options",
+        "Event travel arrangements",
+        "Travel itinerary for group",
+        "Manage group reservations"
+      ],
+      "responses": [
+        "Group travel bookings can be done online or through our travel agents. Special packages and discounts may apply."
+      ]
+    },
+    {
+      "tag": "tour_guides",
+      "patterns": [
+        "Hire a tour guide",
+        "Local guide for sightseeing",
+        "City tour guide options",
+        "Book a private guide",
+        "Language-speaking guide",
+        "Historical site guide",
+        "Group tour guide",
+        "Guide availability and fees",
+        "Tour guide contact info",
+        "Virtual tour guide service"
+      ],
+      "responses": [
+        "Tour guides for cities and attractions can be booked online. Check guide availability, languages, and fees on our portal."
+      ]
+    },
+    {
+      "tag": "car_rentals",
+      "patterns": [
+        "Rent a car for 3 days",
+        "Luxury car hire",
+        "SUV rental near me",
+        "Cheap car rental options",
+        "Pickup and drop car service",
+        "Airport car rental",
+        "Book a car online",
+        "Car rental for road trip",
+        "Long-term rental options",
+        "Book multiple cars"
+      ],
+      "responses": [
+        "Car rentals can be booked via our portal with options for pickup, drop-off, duration, and vehicle type."
+      ]
+    },
+    {
+      "tag": "tourist_timings",
+      "patterns": [
+        "Opening hours for Eiffel Tower",
+        "Museum timings in Rome",
+        "Park visiting hours",
+        "Temple schedule in Bangkok",
+        "Attraction hours tomorrow",
+        "Monument closing days",
+        "Ticket timings for tourist site",
+        "City landmark schedule",
+        "Beach opening times",
+        "Zoo timings near me"
+      ],
+      "responses": [
+        "Timings for tourist attractions, museums, and parks can be checked on official sites or our portal."
+      ]
+    },
+    {
+      "tag": "accessibility_support",
+      "patterns": [
+        "Wheelchair access at airport",
+        "Accessible hotel rooms",
+        "Travel help for disabled",
+        "Guide services for differently-abled",
+        "Accessible transport options",
+        "Special assistance for travelers",
+        "Elevator availability",
+        "Ramp access in city",
+        "Accessible sightseeing spots",
+        "Travel tips for disabled"
+      ],
+      "responses": [
+        "Accessibility information for transport, hotels, and attractions is available online or via our support team."
+      ]
+    },
+    {
+      "tag": "feedback_complaints",
+      "patterns": [
+        "Report issue with booking",
+        "Give feedback on service",
+        "Complaint about flight delay",
+        "Hotel service complaint",
+        "Train journey feedback",
+        "Travel portal feedback",
+        "Customer support complaint",
+        "Submit travel review",
+        "Rate tour guide service",
+        "Share experience with travel"
+      ],
+      "responses": [
+        "You can submit feedback or complaints via our portal. Customer support will respond to issues and suggestions."
+      ]
+    }
+  ]
+}
