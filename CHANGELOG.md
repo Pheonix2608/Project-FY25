@@ -26,6 +26,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2025-09-16
+### Added
+- **Admin Panel**: A new, comprehensive admin panel built with PyQt6.
+  - **Chat Tester Tab**: A full-featured chat interface for testing the bot, with session management, model selection, theme toggling, and chat export.
+  - **API Key Management Tab**: A CRUD interface for managing API keys.
+  - **API Session Viewer Tab**: A log viewer for monitoring API usage, with filtering capabilities.
+  - **Settings Tab**: A tab for configuring the chatbot, including model retraining and feature toggles.
+- **Background Model Training**: The model can now be retrained in a background thread from the admin panel without interrupting the application.
+- **API Session Logging**: All API requests are now logged to `data/api_sessions.json`.
+- **Unit Tests**: Added a `pytest` test suite with initial tests for the text preprocessing module.
+- **Personal Profile**: A placeholder "Profile" feature in the Chat Tester tab.
+
+### Changed
+- **GUI Refactoring**: The old `chatbot_gui.py` has been refactored into a modular admin panel with separate files for each tab under the `admin/` directory.
+- **API Response**: The `/chat` API endpoint now returns a richer JSON object, including the predicted intent and confidence score.
+- **Intent Handling**: The `ResponseHandler` now uses the Google Search fallback for low-confidence predictions when the feature is enabled.
+- **Web Frontend**: The web frontend has been updated to display the intent and confidence score and to show a "typing" indicator.
+
+### Fixed
+- A syntax error in the `BertIntentClassifier`'s `load_model` method.
+- An incorrect `wordnet` dependency in `requirements.txt`.
+- NLTK data download issues in the test environment.
+
 ## [1.3.0] - 2025-08-07
 
 ### Added

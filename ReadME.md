@@ -1,19 +1,22 @@
 # Intelligent Chatbot
 
-An intelligent, modular Python chatbot with a PyQt6 GUI, supporting SVM/BERT intent classification, context-aware responses, API key management, and HTTP API server. Easily extensible and production-ready.
+An intelligent, modular Python chatbot with a PyQt6 Admin Panel, supporting SVM/BERT intent classification, context-aware responses, API key management, and an HTTP API server.
 
 ## Features
 
-- **PyQt6 GUI**: Modern, responsive user interface with light/dark theme support
-- **Intent Classification**: SVM and BERT-based models (switchable via config)
-- **Context Awareness**: Maintains conversation context for natural interactions
-- **API Key Management**: Secure API access for remote clients
-- **HTTP API Server**: Interact with the bot via REST endpoints
-- **Conversation History**: Save/load sessions
-- **Model Retraining**: On-the-fly retraining from GUI
-- **Logging System**: Daily rotation, error tracking
-- **Dataset Inspection Tool**: CLI for analyzing training data
-- **Docker Support**: Containerized deployment
+- **PyQt6 Admin Panel**: A comprehensive admin panel with a tabbed interface for managing and testing the chatbot.
+  - **Chat Tester**: A full-featured chat interface for testing the bot, with session management, model selection, theme toggling, and chat export.
+  - **API Key Management**: A CRUD interface for managing API keys.
+  - **API Session Viewer**: A log viewer for monitoring API usage.
+  - **Settings**: A tab for configuring the chatbot, including model retraining and feature toggles.
+- **Intent Classification**: SVM and BERT-based models (switchable via config).
+- **Context Awareness**: Maintains conversation context for natural interactions.
+- **Google Search Fallback**: Can be configured to use Google Search for unknown intents.
+- **API Key Management**: Secure API access for remote clients.
+- **HTTP API Server**: Interact with the bot via REST endpoints. The API returns rich responses with intent and confidence scores.
+- **Background Model Training**: The model can be retrained in a background thread without interrupting the application.
+- **Logging System**: Daily rotation, error tracking, and API session logging.
+- **Docker Support**: Containerized deployment.
 
 ## Installation
 
@@ -31,124 +34,101 @@ pip install -r requirements.txt
 3. Download NLTK data:
 ```python
 import nltk
-nltk.download('wordnet')
 nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('punkt_tab')
 ```
 
 4. (Optional) Build and run with Docker:
 ```bash
 docker build -t chatbot .
-docker run -p 8000:8000 chatbot
+docker run -p 8080:8080 chatbot
 ```
 
 ## Usage
 
-
-Run the GUI application:
+Run the Admin Panel application:
 ```bash
 python main.py
 ```
 
 #### API Usage
-Start the HTTP API server (runs in background with GUI):
+Start the HTTP API server (runs in background with the Admin Panel):
 Default: `http://localhost:8080`
 
 **Endpoints:**
 - `POST /chat` (headers: `X-API-Key`, body: `{ "message": "..." }`)
-- Generate API key via GUI or use default for testing
+- Generate API keys via the Admin Panel.
 
 **Example request:**
 ```bash
 curl -X POST http://localhost:8080/chat -H "X-API-Key: <your-key>" -d '{"message": "Hello"}'
 ```
 
-### GUI Features
+### Admin Panel Features
 
-- **Send Message**: Type your message and press Enter or click Send
-- **Retrain Model**: Click to retrain the intent classification model
-- **Save History**: Save current conversation to file
-- **Load History**: Load previous conversation from file
-- **Toggle Theme**: Switch between light and dark themes
+- **Chat Tester**:
+  - Send and receive messages to test the bot.
+  - Manage chat sessions (create, load, delete).
+  - Switch between `svm` and `bert` models.
+  - Toggle between light and dark themes.
+  - Export chat history to `.txt` or `.json`.
+- **API Key Management**:
+  - View all existing API keys.
+  - Generate new API keys for different users.
+  - Modify the user ID associated with a key.
+  - Delete API keys.
+- **API Session Viewer**:
+  - View a log of all requests made to the API.
+  - Filter sessions by user ID.
+- **Settings**:
+  - Retrain the model (blocking or in the background).
+  - Enable/disable the Google Search fallback feature.
 
 ## Project Structure
-
 
 ```
 Project-FY25/
 ├── main.py                 # Main application entry point
 ├── config.py               # Configuration settings
 ├── requirements.txt        # Python dependencies
-├── Dockerfile              # Containerization
-├── CHANGELOG.md            # Project changelog
-├── README.md               # This file
-├── conversations.json      # Conversation history
+├── admin/
+│   ├── panel.py            # Main Admin Panel window
+│   └── tabs/
+│       ├── chat_tester_tab.py
+│       ├── api_key_management_tab.py
+│       ├── api_session_viewer_tab.py
+│       └── settings_tab.py
 ├── data/
-│   ├── intents/           # Training data for intents
-│   └── sessions/          # Saved conversation sessions
-├── gui/
-│   └── chatbot_gui.py     # PyQt6 GUI implementation
+│   ├── intents/
+│   ├── sessions/
+│   └── api_sessions.json
 ├── model/
-│   ├── intent_classifier.py   # Intent classification (SVM/BERT)
-│   ├── bert_classifier.py     # BERT model logic
-│   ├── response_handler.py    # Response generation
-│   ├── context_handler.py     # Conversation context management
-│   ├── bert/                  # BERT model files
-│   └── svm/                   # SVM model files
+│   ├── intent_classifier.py
+│   ├── response_handler.py
+│   └── ...
 ├── utils/
-│   ├── logger.py              # Logging configuration
-│   ├── preprocessing.py       # Text preprocessing
-│   ├── api_key_manager.py     # API key management
-│   └── data_loader.py         # Data loading utilities
-├── tools/
-│   └── data_stats.py          # Dataset inspection CLI
-└── logs/
-    └── app.log                # Application logs
+│   ├── api_key_manager.py
+│   └── ...
+└── ...
 ```
 
 ## Configuration
 
 Edit `config.py` to customize:
-
 - Model type (SVM or BERT)
 - GUI appearance and themes
 - Logging settings
 - Context window size
-- Preprocessing options
-
-## Model Performance
-
-
-Current model accuracy: ~33% (SVM). BERT model and data augmentation planned for higher accuracy.
-
-**Supported Intents:**
-- Greeting
-- Goodbye
-- Thanks
-- Name
-- About bot
-- Help
-- Joke
-- Creator
-- Age
-- Status check
-- Apology
-- Compliment
-- Feedback
+- Google Search fallback (can also be toggled from the Admin Panel)
 
 ## Development
 
-
 ### Adding New Intents
-1. Add new intent file in `data/intents/` (or edit existing)
-2. Add patterns and responses
-3. Retrain the model using the GUI
-
-### Model Improvements
-- Increase training data variety
-- Fine-tune hyperparameters
-- Implement data augmentation
-- Add more sophisticated NLP features
-- Switch to BERT for better performance
+1. Add a new intent JSON file in `data/intents/`.
+2. Add patterns and responses to the file.
+3. Retrain the model using the Admin Panel.
 
 ## Troubleshooting
 
