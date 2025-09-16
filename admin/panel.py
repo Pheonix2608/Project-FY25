@@ -52,3 +52,11 @@ class AdminPanel(QWidget):
         self.tabs.addTab(self.settings_tab, "Settings")
 
         self.setLayout(layout)
+
+    def display_message(self, sender, message):
+        """Delegate method to display a message in the chat tester tab."""
+        self.chat_tester_tab.display_message(sender, message)
+
+    def clear_chat(self):
+        """Delegate method to clear the chat in the chat tester tab."""
+        self.chat_tester_tab.clear_chat()
