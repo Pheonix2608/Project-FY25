@@ -92,7 +92,7 @@ class ResponseHandler:
         return random.choice(self.default_responses)
 
     def google_fallback(self, context):
-        """Performs a Google search and returns the results."""
+        """Performs a Google search and returns the results, with a confirmation message."""
         logger.info({
             'event': 'response_source',
             'source': 'google_fallback'
@@ -109,7 +109,8 @@ class ResponseHandler:
                 'query': user_query,
                 'results': google_results
             })
-            return structured_response
+            confirmation = "(This answer was sourced from Google Search because no matching intent was found.)"
+            return f"{structured_response}\n\n{confirmation}"
         except Exception as e:
             logger.error({
                 'event': 'google_fallback_error',

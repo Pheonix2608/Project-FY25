@@ -12,6 +12,20 @@ from admin.tabs.api_session_viewer_tab import ApiSessionViewerTab
 from admin.tabs.settings_tab import SettingsTab
 
 class AdminPanel(QWidget):
+    def apply_dark_mode(self, enabled):
+        if enabled:
+            # Simple dark theme stylesheet
+            self.setStyleSheet("""
+                QWidget { background-color: #232629; color: #f3f3f3; }
+                QTabWidget::pane { border: 1px solid #444; }
+                QTabBar::tab { background: #333; color: #f3f3f3; border: 1px solid #444; padding: 8px; }
+                QTabBar::tab:selected { background: #232629; }
+                QPushButton { background-color: #444; color: #f3f3f3; border: 1px solid #666; }
+                QCheckBox { color: #f3f3f3; }
+                QLabel { color: #f3f3f3; }
+            """)
+        else:
+            self.setStyleSheet("")
     """Admin Panel GUI for the chatbot application."""
 
     def __init__(self, app):

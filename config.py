@@ -6,6 +6,8 @@
 import os
 
 class Config:
+    # ==================== UI CONFIG ====================
+    DARK_MODE = False
     """
     Holds all the configuration settings for the chatbot.
     """

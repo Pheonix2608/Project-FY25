@@ -15,6 +15,57 @@ import subprocess
 import sys
 
 class ChatTesterTab(QWidget):
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        menu.addAction("Copy")
+        menu.addAction("Paste")
+        menu.addAction("Clear Chat")
+        action = menu.exec(event.globalPos())
+        if action and action.text() == "Copy":
+            if self.chat_display.hasFocus():
+                self.chat_display.copy()
+            elif self.input_field.hasFocus():
+                self.input_field.copy()
+        elif action and action.text() == "Paste":
+            if self.input_field.hasFocus():
+                self.input_field.paste()
+        elif action and action.text() == "Clear Chat":
+            self.chat_display.clear()
+
+    def setup_context_menus(self):
+        self.chat_display.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.chat_display.customContextMenuRequested.connect(self.show_chat_context_menu)
+        self.input_field.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.input_field.customContextMenuRequested.connect(self.show_input_context_menu)
+        self.session_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.session_list.customContextMenuRequested.connect(self.show_session_context_menu)
+
+    def show_chat_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.addAction("Copy")
+        menu.addAction("Clear Chat")
+        action = menu.exec(self.chat_display.mapToGlobal(pos))
+        if action and action.text() == "Copy":
+            self.chat_display.copy()
+        elif action and action.text() == "Clear Chat":
+            self.chat_display.clear()
+
+    def show_input_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.addAction("Copy")
+        menu.addAction("Paste")
+        action = menu.exec(self.input_field.mapToGlobal(pos))
+        if action and action.text() == "Copy":
+            self.input_field.copy()
+        elif action and action.text() == "Paste":
+            self.input_field.paste()
+
+    def show_session_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.addAction("Delete Session")
+        action = menu.exec(self.session_list.mapToGlobal(pos))
+        if action and action.text() == "Delete Session":
+            self.delete_selected_session()
     def __init__(self, app_instance):
         super().__init__()
         self.app_instance = app_instance
@@ -110,6 +161,7 @@ class ChatTesterTab(QWidget):
         self.generate_api_key_button.clicked.connect(self.generate_api_key)
 
         self.refresh_sessions_sidebar()
+        self.setup_context_menus()
 
     def send_message(self):
         user_input = self.input_field.text().strip()
@@ -174,16 +226,23 @@ class ChatTesterTab(QWidget):
                 QMessageBox.critical(self, "Delete Session", str(e))
 
     def switch_model(self, new_model):
+        import threading
         if new_model != self.config.MODEL_TYPE:
             reply = QMessageBox.question(
                 self, "Switch Model",
-                f"Switch model to '{new_model}' and restart training?",
+                f"Switch model to '{new_model}'? This will load the model without retraining.",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
             if reply == QMessageBox.StandardButton.Yes:
                 self.config.MODEL_TYPE = new_model
-                self.app_instance.retrain_model()
-                self.display_message("Bot", f"Switched to '{new_model}' model and retrained.")
+                self.display_message("Bot", f"Loading '{new_model}' model. Please wait...")
+                def load_model_thread():
+                    loaded = self.app_instance.intent_classifier.load_model()
+                    if loaded:
+                        self.display_message("Bot", f"Switched to '{new_model}' model and loaded existing weights.")
+                    else:
+                        self.display_message("Bot", f"Model files for '{new_model}' not found. Please retrain manually.")
+                threading.Thread(target=load_model_thread, daemon=True).start()
 
     def toggle_theme(self):
         self.current_theme = "dark" if self.theme_toggle.isChecked() else "light"

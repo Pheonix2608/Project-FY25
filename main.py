@@ -57,13 +57,13 @@ class ChatbotApp:
         try:
             loaded = self.intent_classifier.load_model()
             if not loaded:
-                logger.warning("Model files not found. Starting initial training.")
-                self.retrain_model()
+                logger.warning("Model files not found. Starting initial training in background.")
+                self.retrain_model(background=True)
             else:
                 logger.info("Model loaded successfully.")
         except Exception as e:
-            logger.error(f"Failed to load model: {e}. Retraining...")
-            self.retrain_model()
+            logger.error(f"Failed to load model: {e}. Retraining in background...")
+            self.retrain_model(background=True)
 
         # Initialize GUI
         self.app = QApplication(sys.argv)

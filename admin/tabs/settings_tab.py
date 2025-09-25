@@ -33,6 +33,12 @@ class SettingsTab(QWidget):
 
         layout.addRow(QLabel("Features:"), self.google_search_toggle)
 
+        # Dark mode toggle
+        self.dark_mode_toggle = QCheckBox("Switch to Dark Mode (UI Theme)")
+        self.dark_mode_toggle.setChecked(getattr(self.config, 'DARK_MODE', False))
+        self.dark_mode_toggle.stateChanged.connect(self.toggle_dark_mode)
+        layout.addRow(QLabel("Appearance:"), self.dark_mode_toggle)
+
         self.setLayout(layout)
 
     def toggle_google_search(self, state):
@@ -41,3 +47,17 @@ class SettingsTab(QWidget):
         # We can show a message box, but it might be annoying.
         # A status bar message would be better in a real app.
         print(f"Google Search fallback has been {'enabled' if is_enabled else 'disabled'}.")
+
+    def toggle_dark_mode(self, state):
+        is_enabled = state == Qt.CheckState.Checked.value
+        self.config.DARK_MODE = is_enabled
+        # Apply dark mode to the main window
+        if hasattr(self.app_instance, 'gui') and self.app_instance.gui:
+            self.app_instance.gui.apply_dark_mode(is_enabled)
+        from PyQt6.QtWidgets import QMessageBox
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Theme Changed")
+        msg.setText(f"{'Dark' if is_enabled else 'Light'} mode is now active.")
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg.exec()
