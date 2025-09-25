@@ -57,7 +57,7 @@ class AdminPanel(QWidget):
         # Create and add tabs
         self.chat_tester_tab = ChatTesterTab(self.app_instance)
         self.api_key_management_tab = ApiKeyManagementTab(self.app_instance)
-        self.api_session_viewer_tab = ApiSessionViewerTab(self.config)
+        self.api_session_viewer_tab = ApiSessionViewerTab()
         self.settings_tab = SettingsTab(self.app_instance)
 
         self.tabs.addTab(self.chat_tester_tab, "Chat Tester")

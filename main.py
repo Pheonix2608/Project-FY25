@@ -11,6 +11,7 @@ import torch
 from datetime import datetime
 from PyQt6.QtWidgets import QApplication
 import threading
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # Import project modules
@@ -24,9 +25,6 @@ from model.context_handler import ContextHandler
 from admin.panel import AdminPanel
 from utils.api_key_manager import APIKeyManager
 
-# Initialize logger for the main module
-logger = get_logger(__name__)
-
 class ChatbotApp:
     """
     Main application class that orchestrates the chatbot's functionality.
@@ -35,9 +33,14 @@ class ChatbotApp:
         """
         Initializes the chatbot components and the GUI.
         """
-        logger.info("Initializing Chatbot Application...")
         self.config = Config()
         
+        # Initialize logger
+        global logger
+        logger = get_logger(__name__)
+
+        logger.info("Initializing Chatbot Application...")
+
         # Initialize GUI to None before any potential calls to methods that use it
         self.gui = None
         
@@ -53,6 +56,8 @@ class ChatbotApp:
         self._httpd = None
         self._api_thread = None
         
+        # Database is initialized in the main block
+
         # Load or train the model
         try:
             loaded = self.intent_classifier.load_model()
@@ -66,11 +71,15 @@ class ChatbotApp:
             self.retrain_model(background=True)
 
         # Initialize GUI
-        self.app = QApplication(sys.argv)
-        self.gui = AdminPanel(self)
-        self.gui.setWindowTitle(f"{self.config.PROJECT_NAME} v{self.config.VERSION} - Admin Panel")
+        # self.app = QApplication(sys.argv)
+        # self.gui = AdminPanel(self)
+        # self.gui.setWindowTitle(f"{self.config.PROJECT_NAME} v{self.config.VERSION} - Admin Panel")
         
-        self.gui.show()
+        # self.gui.show()
+
+        # The API server is started in a background thread.
+
+        # The API server is started in a background thread.
         
         logger.info("Chatbot Application initialized and ready.")
 
@@ -144,6 +153,7 @@ class ChatbotApp:
             logger.error(f"Failed to generate API key: {e}")
             return ""
 
+
     # ==================== HTTP API ====================
     def start_api_server(self):
         host = getattr(self.config, 'API_HOST', '0.0.0.0')
@@ -213,7 +223,7 @@ class ChatbotApp:
                     response_data = app_ref.process_input(message)
 
                     # Log the API session
-                    app_ref.log_api_session(user_id, message, response_data)
+                    app_ref.log_api_session(user_id, api_key, payload, response_data)
 
                     return self._send_json(200, {
                         "user_id": user_id,
@@ -246,30 +256,27 @@ class ChatbotApp:
         except Exception:
             pass
 
-    def log_api_session(self, user_id, message, response_data):
-        """Logs an API session to a file."""
-        log_file = os.path.join(self.config.BASE_DIR, 'data', 'api_sessions.json')
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "user_id": user_id,
-            "message": message,
-            "response": response_data.get("response"),
-            "intent": response_data.get("intent"),
-            "confidence": response_data.get("confidence")
-        }
-
+    def log_api_session(self, user_id, api_key, request_data, response_data):
+        """Logs an API session to the database."""
         try:
-            logs = []
-            if os.path.exists(log_file):
-                with open(log_file, 'r') as f:
-                    logs = json.load(f)
-
-            logs.append(log_entry)
-
-            with open(log_file, 'w') as f:
-                json.dump(logs, f, indent=4)
+            from utils.database import get_db_connection
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    INSERT INTO api_sessions (user_id, api_key, request_data, response_data)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (
+                        user_id,
+                        api_key,
+                        json.dumps(request_data),
+                        json.dumps(response_data)
+                    )
+                )
+                conn.commit()
         except Exception as e:
-            logger.error(f"Failed to log API session: {e}", exc_info=True)
+            logger.error(f"Failed to log API session to database: {e}", exc_info=True)
 
     def retrain_model(self, background=False):
         """
@@ -370,7 +377,11 @@ class ChatbotApp:
         """
         Starts the main event loop of the application.
         """
-        sys.exit(self.app.exec())
+        # sys.exit(self.app.exec())
+        # Keep the main thread alive
+        while True:
+            import time
+            time.sleep(1)
 
 if __name__ == '__main__':
     bot = ChatbotApp()
