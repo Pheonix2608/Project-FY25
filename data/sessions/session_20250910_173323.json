@@ -1,0 +1,14 @@
+[
+    {
+        "role": "bot",
+        "text": "I'm not sure I understand."
+    },
+    {
+        "role": "user",
+        "text": "help"
+    },
+    {
+        "role": "bot",
+        "text": "I'm available to help! I can assist with conversations, answer questions, provide solutions, and offer support. How can I help you?"
+    }
+]

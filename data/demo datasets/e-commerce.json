@@ -1,0 +1,760 @@
+{
+  "intents": [
+    {
+      "tag": "product_search",
+      "patterns": [
+        "I want to search for a laptop",
+        "Find shoes for men",
+        "Search for iPhone 15",
+        "Looking for running shoes",
+        "Find Samsung TVs",
+        "Search for wireless headphones",
+        "Look for office chairs",
+        "Show me gaming consoles",
+        "Find leather bags",
+        "Search for fitness trackers"
+      ],
+      "responses": [
+        "You can search products by name, category, or brand on our portal."
+      ]
+    },
+    {
+      "tag": "product_categories",
+      "patterns": [
+        "Show me electronics",
+        "What product categories are available?",
+        "List all clothing items",
+        "Categories of kitchen appliances",
+        "I want to browse sports gear",
+        "Home decor products",
+        "Fashion accessories categories",
+        "Books section",
+        "Toys and games categories",
+        "Beauty products categories"
+      ],
+      "responses": [
+        "We have a wide range of product categories including electronics, fashion, home, beauty, and more."
+      ]
+    },
+    {
+      "tag": "product_details",
+      "patterns": [
+        "Tell me about iPhone 15 features",
+        "Product details for Nike shoes",
+        "Specifications of Samsung TV",
+        "Show size chart for jackets",
+        "Battery details for headphones",
+        "Material of this bag",
+        "Color options available?",
+        "Dimensions of office chair",
+        "Weight of gaming console",
+        "Warranty information for laptop"
+      ],
+      "responses": [
+        "You can view detailed specifications, sizes, colors, and features of products on the product page."
+      ]
+    },
+    {
+      "tag": "product_availability",
+      "patterns": [
+        "Is this product in stock?",
+        "Check availability of iPhone 15",
+        "Are Nike shoes available?",
+        "Stock status for Samsung TV",
+        "Available sizes for jacket",
+        "Can I buy this product now?",
+        "Check inventory for laptop",
+        "Product availability in my city",
+        "Stock update for headphones",
+        "Available colors for bag"
+      ],
+      "responses": [
+        "You can check real-time stock availability for any product on our portal."
+      ]
+    },
+    {
+      "tag": "product_recommendations",
+      "patterns": [
+        "Recommend laptops under $1000",
+        "Suggest sports shoes for running",
+        "Best headphones for gaming",
+        "Top smartphones this year",
+        "Recommend kitchen appliances",
+        "Gift suggestions for birthday",
+        "Popular fashion accessories",
+        "Trending home decor items",
+        "Best-selling books",
+        "Suggest fitness trackers"
+      ],
+      "responses": [
+        "We provide product recommendations based on your preferences and popular items."
+      ]
+    },
+    {
+      "tag": "price_inquiry",
+      "patterns": [
+        "Price of iPhone 15",
+        "How much is this laptop?",
+        "Cost of Nike shoes",
+        "Check Samsung TV price",
+        "Price for leather bag",
+        "Price comparison for headphones",
+        "Discounted price of jacket",
+        "Current price of gaming console",
+        "Show price for blender",
+        "Price of office chair online"
+      ],
+      "responses": [
+        "You can view the price of any product on the product page along with discounts and offers."
+      ]
+    },
+    {
+      "tag": "discount_offers",
+      "patterns": [
+        "Any discounts on iPhone?",
+        "Current offers on laptops",
+        "Discount codes for Nike shoes",
+        "Promotions for Samsung TV",
+        "Flash sale for headphones",
+        "Buy one get one offers",
+        "Seasonal discounts on jackets",
+        "Special deals for gaming consoles",
+        "Coupons for home decor",
+        "Limited time offer on bags"
+      ],
+      "responses": [
+        "You can check active discounts, offers, and promo codes on our deals page."
+      ]
+    },
+    {
+      "tag": "new_arrivals",
+      "patterns": [
+        "Show me new products",
+        "Latest arrivals in electronics",
+        "New fashion items",
+        "Recent book releases",
+        "New kitchen appliances",
+        "Latest mobile phones",
+        "Recently added sports gear",
+        "New beauty products",
+        "Fresh stock of shoes",
+        "New arrivals in home decor"
+      ],
+      "responses": [
+        "You can explore all new arrivals on our portal under the 'New Arrivals' section."
+      ]
+    },
+    {
+      "tag": "best_sellers",
+      "patterns": [
+        "Top-selling laptops",
+        "Best-selling fashion items",
+        "Popular books this month",
+        "Most bought electronics",
+        "Trending kitchen appliances",
+        "Best-selling shoes",
+        "Popular beauty products",
+        "Top-rated gaming consoles",
+        "Best-selling home decor",
+        "Check best sellers in mobile phones"
+      ],
+      "responses": [
+        "Check out our best-selling products across categories to see what’s popular."
+      ]
+    },
+    {
+      "tag": "product_reviews",
+      "patterns": [
+        "Show reviews for iPhone 15",
+        "Customer feedback on Nike shoes",
+        "User reviews for Samsung TV",
+        "Product rating for laptop",
+        "Read reviews for jacket",
+        "Check ratings of gaming console",
+        "Reviews on headphones",
+        "See product feedback for blender",
+        "Customer opinions on bag",
+        "Product testimonials online"
+      ],
+      "responses": [
+        "You can read customer reviews, ratings, and feedback for each product on its page."
+      ]
+    },
+    {
+      "tag": "add_to_cart",
+      "patterns": [
+        "Add this laptop to cart",
+        "Put iPhone in my cart",
+        "Add Nike shoes to basket",
+        "Add Samsung TV to shopping cart",
+        "Include this jacket in my cart",
+        "Add gaming console to cart",
+        "Add multiple items to cart",
+        "Add headphones to cart",
+        "Add leather bag to cart",
+        "Add blender to cart"
+      ],
+      "responses": [
+        "Products can be added to your cart using the 'Add to Cart' button on the product page."
+      ]
+    },
+    {
+      "tag": "remove_from_cart",
+      "patterns": [
+        "Remove laptop from cart",
+        "Delete iPhone from my cart",
+        "Remove shoes from shopping basket",
+        "Delete Samsung TV from cart",
+        "Remove jacket from cart",
+        "Remove gaming console from cart",
+        "Delete headphones from basket",
+        "Remove bag from cart",
+        "Delete blender from cart",
+        "Remove multiple items from cart"
+      ],
+      "responses": [
+        "You can remove items from your cart by clicking the 'Remove' button next to each product."
+      ]
+    },
+    {
+      "tag": "view_cart",
+      "patterns": [
+        "Show my cart",
+        "View shopping cart",
+        "Check items in cart",
+        "Display my basket",
+        "Open cart to review items",
+        "View added products",
+        "Check cart total",
+        "Show all items in cart",
+        "View saved items",
+        "Cart summary online"
+      ],
+      "responses": [
+        "You can view all items in your cart along with prices and quantities in the cart section."
+      ]
+    },
+    {
+      "tag": "checkout_process",
+      "patterns": [
+        "Proceed to checkout",
+        "How to checkout?",
+        "Complete my purchase",
+        "Go to payment page",
+        "Check out all items",
+        "Place order online",
+        "Finalize order",
+        "Checkout my shopping cart",
+        "Confirm my purchase",
+        "Start checkout process"
+      ],
+      "responses": [
+        "You can proceed to checkout from your cart and follow the steps for shipping and payment."
+      ]
+    },
+    {
+      "tag": "apply_coupon",
+      "patterns": [
+        "Apply coupon code",
+        "Use promo code",
+        "Discount code for order",
+        "Add voucher at checkout",
+        "Redeem coupon",
+        "Enter offer code",
+        "Use gift voucher",
+        "Apply discount code online",
+        "Apply coupon to cart",
+        "Check promo code validity"
+      ],
+      "responses": [
+        "You can apply coupons or promo codes at checkout to avail discounts."
+      ]
+    },
+    {
+      "tag": "order_summary",
+      "patterns": [
+        "Show my order summary",
+        "Check order details",
+        "View items in order",
+        "Order confirmation details",
+        "Review my purchase",
+        "Check order total",
+        "Summary of purchased items",
+        "Order breakdown",
+        "View billing info",
+        "Check shipping details"
+      ],
+      "responses": [
+        "You can view order summary including items, prices, and shipping details on the portal."
+      ]
+    },
+    {
+      "tag": "order_confirmation",
+      "patterns": [
+        "Confirm my order",
+        "Order placed successfully?",
+        "Check if my order went through",
+        "Order confirmation email",
+        "Has my purchase been confirmed?",
+        "Order received confirmation",
+        "Verify my order status",
+        "Check order ID",
+        "Order confirmation number",
+        "Order placement confirmation"
+      ],
+      "responses": [
+        "You will receive an order confirmation on email and SMS. Order status can also be tracked on the portal."
+      ]
+    },
+    {
+      "tag": "payment_pending",
+      "patterns": [
+        "Payment not completed",
+        "Pending payment for order",
+        "Check if payment succeeded",
+        "Failed payment notification",
+        "Order awaiting payment",
+        "Payment verification for my order",
+        "Pending checkout payment",
+        "Incomplete transaction",
+        "Retry payment",
+        "Order pending due to payment"
+      ],
+      "responses": [
+        "Please complete your payment to confirm the order. You can retry payment from your order summary page."
+      ]
+    },
+    {
+      "tag": "multiple_items_order",
+      "patterns": [
+        "Order multiple items",
+        "Buy 3 laptops at once",
+        "Purchase several products",
+        "Place bulk order",
+        "Add multiple items to checkout",
+        "Order 5 T-shirts together",
+        "Bulk purchase for office",
+        "Order multiple gifts",
+        "Place large order",
+        "Checkout multiple items together"
+      ],
+      "responses": [
+        "You can order multiple items together and proceed to checkout in one go."
+      ]
+    },
+    {
+      "tag": "save_for_later",
+      "patterns": [
+        "Save this item for later",
+        "Move product to wishlist",
+        "Bookmark this item",
+        "Add to favorites",
+        "Save jacket for next purchase",
+        "Wishlist my cart items",
+        "Mark product to buy later",
+        "Save bag for future",
+        "Move headphones to saved list",
+        "Keep items for later checkout"
+      ],
+      "responses": [
+        "Items can be saved for later in your wishlist to purchase in future."
+      ]
+    },
+    {
+      "tag": "payment_options",
+      "patterns": [
+        "What payment methods are accepted?",
+        "Can I pay with credit card?",
+        "Do you accept PayPal?",
+        "Payment via UPI available?",
+        "Cash on delivery option?",
+        "Use gift card for payment",
+        "Installment payment options",
+        "Digital wallet payments",
+        "Payment by net banking",
+        "Alternative payment methods"
+      ],
+      "responses": [
+        "We accept multiple payment methods including credit/debit cards, UPI, PayPal, wallets, and cash on delivery (where applicable)."
+      ]
+    },
+    {
+      "tag": "payment_status",
+      "patterns": [
+        "Check payment status",
+        "Was my payment successful?",
+        "Payment confirmation pending",
+        "Did my transaction go through?",
+        "Verify payment for order",
+        "Payment failed notification",
+        "Check payment history",
+        "Order paid or not?",
+        "Track payment status",
+        "Payment receipt available?"
+      ],
+      "responses": [
+        "You can check the payment status for any order in your account under 'Orders' section."
+      ]
+    },
+    {
+      "tag": "failed_payment",
+      "patterns": [
+        "Payment failed for my order",
+        "Transaction not completed",
+        "Retry failed payment",
+        "Unable to pay online",
+        "Credit card declined",
+        "Payment error occurred",
+        "Payment unsuccessful",
+        "Failed to checkout",
+        "Payment gateway issue",
+        "Retry transaction"
+      ],
+      "responses": [
+        "If your payment failed, please retry using a valid payment method or contact support for assistance."
+      ]
+    },
+    {
+      "tag": "refund_request",
+      "patterns": [
+        "Request refund for order",
+        "How to get money back?",
+        "Return and refund process",
+        "Refund for cancelled order",
+        "Refund status check",
+        "Initiate refund online",
+        "Money not credited",
+        "Order returned, request refund",
+        "Partial refund request",
+        "Refund policy details"
+      ],
+      "responses": [
+        "Refunds can be requested from your orders section. Processing time depends on payment method and bank."
+      ]
+    },
+    {
+      "tag": "billing_information",
+      "patterns": [
+        "Update billing address",
+        "Change payment details",
+        "Billing info for invoice",
+        "Check billing history",
+        "Add new billing method",
+        "Edit card details",
+        "Update payment info",
+        "Verify billing information",
+        "Billing contact info",
+        "Manage billing account"
+      ],
+      "responses": [
+        "You can manage and update your billing information in your account settings."
+      ]
+    },
+    {
+      "tag": "invoice_generation",
+      "patterns": [
+        "Generate invoice for my order",
+        "Download order invoice",
+        "Request bill for purchase",
+        "Invoice for online order",
+        "Get invoice PDF",
+        "Print receipt for order",
+        "Email invoice",
+        "Order invoice copy",
+        "View invoice online",
+        "Billing receipt for payment"
+      ],
+      "responses": [
+        "Invoices can be generated and downloaded from your order history in your account."
+      ]
+    },
+    {
+      "tag": "gift_cards_vouchers",
+      "patterns": [
+        "Buy a gift card",
+        "Redeem voucher code",
+        "Use gift card for order",
+        "Check gift card balance",
+        "Purchase e-voucher",
+        "Send gift card to friend",
+        "Apply voucher at checkout",
+        "Gift voucher validity",
+        "Gift card promotions",
+        "Voucher redemption process"
+      ],
+      "responses": [
+        "Gift cards and vouchers can be purchased and redeemed online according to the terms provided."
+      ]
+    },
+    {
+      "tag": "wallet_loyalty_points",
+      "patterns": [
+        "Check wallet balance",
+        "Redeem loyalty points",
+        "Add money to wallet",
+        "Earn points on order",
+        "Use points for purchase",
+        "Wallet transaction history",
+        "Available reward points",
+        "Apply loyalty points to cart",
+        "Convert points to discount",
+        "Check rewards balance"
+      ],
+      "responses": [
+        "You can check, add, and redeem wallet balance or loyalty points in your account."
+      ]
+    },
+    {
+      "tag": "shipping_options",
+      "patterns": [
+        "Available shipping methods",
+        "Delivery options for order",
+        "Fast shipping available?",
+        "Check shipping types",
+        "Standard or express delivery?",
+        "International shipping?",
+        "Pickup from store option",
+        "Home delivery charges",
+        "Same day delivery?",
+        "Courier options for order"
+      ],
+      "responses": [
+        "We offer multiple shipping options including standard, express, and international delivery."
+      ]
+    },
+    {
+      "tag": "track_order",
+      "patterns": [
+        "Track my order",
+        "Order shipment status",
+        "Delivery tracking number",
+        "Where is my package?",
+        "Check courier status",
+        "Track order online",
+        "Estimated arrival of order",
+        "Shipment tracking link",
+        "Order in transit",
+        "Delivery updates for my order"
+      ],
+      "responses": [
+        "You can track your order in real-time using the tracking number provided in your order details."
+      ]
+    },
+    {
+      "tag": "estimated_delivery",
+      "patterns": [
+        "When will my order arrive?",
+        "Estimated delivery date",
+        "Delivery time for package",
+        "Expected delivery for shipment",
+        "Check arrival date",
+        "Delivery schedule online",
+        "Package expected date",
+        "Shipping time estimate",
+        "Order delivery timeframe",
+        "Track estimated arrival"
+      ],
+      "responses": [
+        "Estimated delivery dates are provided in your order summary based on shipping method and location."
+      ]
+    },
+    {
+      "tag": "change_shipping_address",
+      "patterns": [
+        "Update shipping address",
+        "Change delivery location",
+        "Edit address for order",
+        "Shipping address correction",
+        "Modify delivery address",
+        "Wrong address update",
+        "Change recipient address",
+        "Shipping location change",
+        "Update address before dispatch",
+        "Edit order shipping info"
+      ],
+      "responses": [
+        "Shipping address can be updated before dispatch in your order settings."
+      ]
+    },
+    {
+      "tag": "delivery_delay",
+      "patterns": [
+        "My order is delayed",
+        "Delivery not arrived on time",
+        "Shipment delayed",
+        "Order late",
+        "Track delayed package",
+        "Check why delivery is late",
+        "Expected delivery delayed",
+        "Delivery ETA changed",
+        "Package not delivered yet",
+        "Order status delayed"
+      ],
+      "responses": [
+        "Delivery delays may occur due to courier or logistics issues. You can track updates in your order details."
+      ]
+    },
+    {
+      "tag": "return_policy",
+      "patterns": [
+        "What is the return policy?",
+        "How to return a product?",
+        "Check refund and return rules",
+        "Return time limit for orders",
+        "Policy for defective items",
+        "Exchange policy details",
+        "Return procedure online",
+        "How to initiate a return?",
+        "Return conditions for items",
+        "Refund eligibility rules"
+      ],
+      "responses": [
+        "You can check return and exchange policies on the product page or our support section."
+      ]
+    },
+    {
+      "tag": "initiate_return",
+      "patterns": [
+        "Start a return request",
+        "Return my order",
+        "How to return item online?",
+        "Initiate product return",
+        "Request refund for returned product",
+        "Return defective item",
+        "Start exchange process",
+        "Return procedure for order",
+        "Submit return request",
+        "Return via portal"
+      ],
+      "responses": [
+        "Returns can be initiated from your order history. Follow the steps to generate a return label and submit your request."
+      ]
+    },
+    {
+      "tag": "exchange_product",
+      "patterns": [
+        "Exchange my product",
+        "Swap this item for another size",
+        "Request product replacement",
+        "Exchange defective product",
+        "How to exchange order online?",
+        "Product exchange request",
+        "Change product for another variant",
+        "Exchange procedure",
+        "Initiate item exchange",
+        "Request replacement for order"
+      ],
+      "responses": [
+        "You can request a product exchange online, subject to eligibility and stock availability."
+      ]
+    },
+    {
+      "tag": "customer_support_contact",
+      "patterns": [
+        "Contact customer support",
+        "Need help with my order",
+        "Talk to a support agent",
+        "Support email or phone",
+        "Live chat for help",
+        "Customer care details",
+        "Report an issue",
+        "Order assistance",
+        "Reach out to help desk",
+        "Get support online"
+      ],
+      "responses": [
+        "Customer support is available via chat, email, or phone. You can reach out for any order or account issues."
+      ]
+    },
+    {
+      "tag": "complaint_feedback",
+      "patterns": [
+        "File a complaint",
+        "Give feedback about service",
+        "Report issue with product",
+        "Feedback for delivery",
+        "Complaint about order delay",
+        "Product review feedback",
+        "Customer service complaint",
+        "Submit suggestion",
+        "Report problem with app",
+        "Rate my experience"
+      ],
+      "responses": [
+        "You can submit complaints or feedback via our portal. Customer service will respond promptly."
+      ]
+    },
+    {
+      "tag": "warranty_guarantee",
+      "patterns": [
+        "Check product warranty",
+        "Warranty for my laptop",
+        "Guarantee period for item",
+        "Product warranty status",
+        "Warranty claim process",
+        "Check status of warranty",
+        "Warranty coverage for product",
+        "How long is warranty?",
+        "Warranty terms and conditions",
+        "Claim warranty online"
+        ],
+      "responses": [
+      "You can view warranty and guarantee details on the product page or request warranty service through your account."
+      ]
+    },
+    {
+    "tag": "damaged_defective_product",
+    "patterns": [
+      "Received damaged item",
+      "Product defective on delivery",
+      "Broken item arrived",
+      "Order received with faults",
+      "Defective product replacement",
+      "How to report damaged item?",
+      "Received wrong product condition",
+      "Broken package",
+      "Faulty item received",
+      "Item not working as expected"
+      ],
+    "responses": [
+      "If you received a damaged or defective product, you can initiate a return or replacement request through your order page."
+      ]
+    },
+    {
+    "tag": "cancel_order",
+    "patterns": [
+      "Cancel my order",
+      "How to cancel an order?",
+      "Request order cancellation",
+      "Cancel purchase online",
+      "Stop my order processing",
+      "Order cancellation policy",
+      "Cancel pending order",
+      "Cancel shipment",
+      "Can I cancel an item?",
+      "Undo order placement"
+      ],
+    "responses": [
+      "Orders can be canceled before shipping. You can request cancellation in your order summary page."
+      ]
+    },
+    {
+    "tag": "account_profile_issues",
+    "patterns": [
+      "Update my account details",
+      "Change profile information",
+      "Reset password",
+      "Recover account",
+      "Edit contact details",
+      "Change email address",
+      "Update phone number",
+      "Account locked",
+      "Login issues",
+      "Manage profile settings"
+      ],
+    "responses": [
+      "You can manage your account and profile settings in the account section of the portal."
+      ]
+    }
+  ]
+}

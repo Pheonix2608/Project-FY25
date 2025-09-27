@@ -1,0 +1,635 @@
+{
+  "intents": [
+    {
+      "tag": "admission_undergrad",
+      "patterns": [
+        "How do I apply for B.Tech at Arya College?",
+        "Admission procedure for Computer Science undergrad",
+        "What are the eligibility criteria for ECE branch?",
+        "Is online application available for B.Tech?",
+        "Deadlines for UG admissions this year",
+        "Documents required for engineering admission",
+        "Fees for first-year B.Tech",
+        "Can I apply for multiple branches?",
+        "Entrance exams required for Arya College?",
+        "How to submit the admission form?"
+      ],
+      "responses": [
+        "You can apply online for B.Tech at Arya College through the official admission portal. Eligibility depends on your 12th grade marks.",
+        "For UG admissions, fill the online form, submit required documents, and check the deadlines for your desired branch."
+      ]
+    },
+    {
+      "tag": "admission_postgrad",
+      "patterns": [
+        "Admission for MBA at Arya College",
+        "How to apply for M.Tech?",
+        "Eligibility criteria for MCA",
+        "PG application process online",
+        "Deadlines for MBA admission",
+        "Documents needed for M.Tech admission",
+        "Entrance test for MBA",
+        "Fees for postgraduate courses",
+        "Can I apply for multiple PG programs?",
+        "Submission guidelines for PG application"
+      ],
+      "responses": [
+        "Postgraduate admissions at Arya College require an online application and relevant academic documents. Entrance exams may be needed for some programs."
+      ]
+    },
+    {
+      "tag": "course_info_btech",
+      "patterns": [
+        "What courses are offered in B.Tech?",
+        "Subjects for Computer Science engineering",
+        "Duration of ECE program",
+        "Syllabus for Mechanical branch",
+        "Specializations available in B.Tech",
+        "Are there elective subjects?",
+        "Online classes for B.Tech courses?",
+        "Faculty for Civil Engineering",
+        "Course details for IT branch",
+        "Short-term workshops for UG students"
+      ],
+      "responses": [
+        "Arya College offers B.Tech programs in CSE, ECE, IT, Civil, Mechanical, and Electrical branches. Each program has a detailed syllabus with core and elective subjects."
+      ]
+    },
+    {
+      "tag": "course_info_pg",
+      "patterns": [
+        "Courses offered for MBA",
+        "Specializations in M.Tech",
+        "Subjects in MCA program",
+        "Online PG courses available?",
+        "Duration of M.Sc programs",
+        "Eligibility for PG programs",
+        "Syllabus details for MBA",
+        "Are electives available in M.Tech?",
+        "Faculty details for PG courses",
+        "Short-term certifications for PG students"
+      ],
+      "responses": [
+        "Arya College provides PG courses including MBA, MCA, M.Tech, and M.Sc with detailed syllabi, electives, and faculty support. Online PG courses are also available."
+      ]
+    },
+    {
+      "tag": "exam_schedule",
+      "patterns": [
+        "When are B.Tech midterm exams?",
+        "Semester exam timetable for MCA",
+        "Exam dates for MBA first semester",
+        "Practical exams schedule",
+        "Re-exam dates for engineering students",
+        "Entrance exam schedule for PG",
+        "Online test dates",
+        "Assignment submission deadlines",
+        "Quiz schedule for online courses",
+        "Exam halls and seating arrangements"
+      ],
+      "responses": [
+        "Exam schedules are published on the Arya College student portal. You can check your timetable using your student ID."
+      ]
+    },
+    {
+      "tag": "results_inquiry",
+      "patterns": [
+        "When will B.Tech results be announced?",
+        "Check my MCA semester results",
+        "Grades for MBA final exams",
+        "Result date for online courses",
+        "How to view my scorecard?",
+        "Download mark sheet online",
+        "Results for entrance exams",
+        "Practical exam marks available?",
+        "Online exam results check",
+        "Re-evaluation result dates"
+      ],
+      "responses": [
+        "Results can be viewed on the student portal using your student ID. Notifications are sent when results are published."
+      ]
+    },
+    {
+      "tag": "fee_enquiry",
+      "patterns": [
+        "Tuition fees for B.Tech",
+        "Fee structure for MBA",
+        "Installment options available?",
+        "Scholarship applicable for fees?",
+        "How much is the admission fee?",
+        "Late payment charges",
+        "Payment methods for tuition",
+        "Can I pay online?",
+        "Total cost for short-term courses",
+        "Are there extra charges?"
+      ],
+      "responses": [
+        "Fees for each program are available on the Arya College portal. You can pay online or in installments if applicable."
+      ]
+    },
+    {
+      "tag": "scholarship_info",
+      "patterns": [
+        "Are scholarships offered?",
+        "Apply for merit scholarship",
+        "Need-based scholarship criteria",
+        "Sports scholarship eligibility",
+        "Scholarship application deadline",
+        "International student scholarships",
+        "Amount provided under scholarship",
+        "How to check scholarship status?",
+        "Are online course scholarships available?",
+        "Do we get tuition waiver?"
+      ],
+      "responses": [
+        "Arya College offers merit-based, need-based, and sports scholarships. Details and applications are on the scholarship portal."
+      ]
+    },
+    {
+      "tag": "faculty_info",
+      "patterns": [
+        "Who is the head of CSE department?",
+        "List of professors in MBA",
+        "Faculty contact for Physics",
+        "Email of course coordinator",
+        "Office hours of professors",
+        "Available faculty for consultation",
+        "Department head details",
+        "Profile of teaching staff",
+        "Faculty for online courses",
+        "Research supervisor contacts"
+      ],
+      "responses": [
+        "Faculty details including emails, office hours, and research profiles are available on the Arya College website."
+      ]
+    },
+    {
+      "tag": "campus_facilities",
+      "patterns": [
+        "Library timings",
+        "Computer lab access",
+        "Sports facilities available",
+        "Cafeteria menu and hours",
+        "Hostel accommodation",
+        "Wi-Fi availability on campus",
+        "Parking facilities",
+        "Medical services on campus",
+        "Auditorium and seminar halls",
+        "Campus shuttle schedule"
+      ],
+      "responses": [
+        "Arya College provides library, labs, sports, hostel, cafeteria, Wi-Fi, medical support, and transportation facilities."
+      ]
+    },
+    {
+      "tag": "hostel_facility",
+      "patterns": [
+        "Hostel availability for B.Tech students",
+        "Room allocation in Arya College hostel",
+        "Fees for hostel accommodation",
+        "Single and shared rooms",
+        "Hostel timings and rules",
+        "Internet availability in hostel",
+        "Mess menu and charges",
+        "How to apply for hostel?",
+        "Emergency contact in hostel",
+        "Leave application from hostel"
+      ],
+      "responses": [
+        "Arya College hostels have rooms with Wi-Fi, mess facilities, and 24/7 security. Room allocation is done online after admission confirmation."
+      ]
+    },
+    {
+      "tag": "placement_career",
+      "patterns": [
+        "Upcoming placement drives",
+        "Internship opportunities",
+        "Companies visiting Arya College",
+        "Career counseling sessions",
+        "Resume building workshops",
+        "How to register for placements?",
+        "Alumni network for career help",
+        "Job fairs schedule",
+        "Placement cell contact",
+        "Training programs for students"
+      ],
+      "responses": [
+        "Placement drives and internships are organized regularly. Career counseling and training programs are provided by the placement cell."
+      ]
+    },
+    {
+      "tag": "online_course_registration",
+      "patterns": [
+        "How to register for online courses?",
+        "Enroll in MOOCs",
+        "Sign up for certification courses",
+        "Online course registration deadline",
+        "Apply for e-learning programs",
+        "Register for short-term online courses",
+        "Online portal course enrollment",
+        "Available online courses",
+        "Check registration status",
+        "Can I register multiple courses?"
+      ],
+      "responses": [
+        "You can register for online courses through the e-learning portal using your student ID. Deadlines and details are listed there."
+      ]
+    },
+    {
+      "tag": "video_lectures",
+      "patterns": [
+        "Access recorded classes",
+        "Lecture videos for CSE",
+        "Online course video lectures",
+        "Replay last class",
+        "Download lecture recordings",
+        "Where can I find webinars?",
+        "Streaming lectures online",
+        "Recorded lectures for MBA",
+        "Video tutorial for Physics",
+        "E-learning class videos"
+      ],
+      "responses": [
+        "All recorded lectures are available on the online learning portal. You can stream or download them using your login credentials."
+      ]
+    },
+    {
+      "tag": "assignment_submission",
+      "patterns": [
+        "Submit my assignment online",
+        "Assignment due dates for B.Tech",
+        "How to upload homework?",
+        "Submit MCA assignments",
+        "Deadline for MBA project submission",
+        "Online portal for assignment uploads",
+        "Upload lab reports",
+        "Submit essay for English course",
+        "Assignment extensions available?",
+        "Check submitted assignments"
+      ],
+      "responses": [
+        "Assignments can be submitted via the student portal. Make sure to follow the deadlines and file format guidelines."
+      ]
+    },
+    {
+      "tag": "online_quizzes",
+      "patterns": [
+        "Take the online quiz for CSE",
+        "Quiz schedule for MBA students",
+        "Upcoming online tests",
+        "Submit answers for online quiz",
+        "Check quiz results",
+        "Quiz rules and timing",
+        "Can I retake the quiz?",
+        "Quiz for short-term online course",
+        "Practice tests available?",
+        "How to join quiz?"
+      ],
+      "responses": [
+        "Online quizzes are accessible via the e-learning portal. Check the schedule and ensure you submit within the allocated time."
+      ]
+    },
+    {
+      "tag": "certificates_completion",
+      "patterns": [
+        "Download course completion certificate",
+        "Check certificate status",
+        "How to get online course certificate?",
+        "Verify certificate for e-learning",
+        "Completion certificate for short-term course",
+        "Digital certificate for MBA program",
+        "Certificate for internship",
+        "MOOC completion certificate",
+        "Request for duplicate certificate",
+        "Issue of verification letter"
+      ],
+      "responses": [
+        "Certificates for completed courses can be downloaded from the student portal. Verification and re-issue requests can also be submitted online."
+      ]
+    },
+    {
+      "tag": "portal_login_support",
+      "patterns": [
+        "Can't login to student portal",
+        "Reset my password",
+        "Portal showing error",
+        "How to access e-learning site?",
+        "Login issues for online courses",
+        "Forgot username",
+        "Two-factor authentication help",
+        "Portal timeout problem",
+        "Technical support for portal",
+        "Account locked, need help"
+      ],
+      "responses": [
+        "For portal login issues, reset your password or contact the technical support team. Ensure you are using your registered student ID."
+      ]
+    },
+    {
+      "tag": "discussion_forums",
+      "patterns": [
+        "Join discussion forum for CSE",
+        "Post question in online forum",
+        "View student queries",
+        "Reply to discussion topic",
+        "Forum for MBA students",
+        "Technical support discussion board",
+        "Online Q&A platform",
+        "Faculty responding in forums?",
+        "Discussion threads for projects",
+        "Moderation rules for forums"
+      ],
+      "responses": [
+        "You can participate in discussion forums through the e-learning portal. Follow forum guidelines and reply to threads appropriately."
+      ]
+    },
+    {
+      "tag": "notifications_announcements",
+      "patterns": [
+        "Latest announcements from college",
+        "Important notifications for B.Tech",
+        "Check MBA alerts",
+        "Online course notifications",
+        "Events notifications",
+        "Deadline reminders",
+        "Exam updates",
+        "Scholarship announcements",
+        "Placement alerts",
+        "Workshop notifications"
+      ],
+      "responses": [
+        "All announcements and notifications are published on the student portal and via email. Check regularly to stay updated."
+      ]
+    },
+    {
+      "tag": "library_services",
+      "patterns": [
+        "Search books in library",
+        "Check journal availability",
+        "Borrow a book",
+        "Library timings",
+        "Online library access",
+        "Research paper downloads",
+        "E-books for online courses",
+        "Renew borrowed books",
+        "Reserve a study room",
+        "Library contact details"
+      ],
+      "responses": [
+        "Arya College library provides physical and online resources. You can search, borrow, and access e-books and journals via the portal."
+      ]
+    },
+    {
+      "tag": "alumni_network",
+      "patterns": [
+        "Connect with alumni",
+        "Alumni meet schedule",
+        "Mentorship from alumni",
+        "Alumni contact for career guidance",
+        "Alumni networking events",
+        "Alumni database search",
+        "Join alumni community",
+        "Alumni volunteering opportunities",
+        "Alumni newsletter",
+        "Professional support from alumni"
+      ],
+      "responses": [
+        "Alumni can be contacted via the alumni portal. Networking events and mentorship opportunities are regularly organized."
+      ]
+    },
+    {
+      "tag": "career_counseling",
+      "patterns": [
+        "Schedule career counseling",
+        "Resume review sessions",
+        "Internship guidance",
+        "Job interview preparation",
+        "Career workshops for students",
+        "Mentor appointment",
+        "Placement eligibility check",
+        "Career advice for PG students",
+        "Industry guidance for UG",
+        "Career counseling online"
+      ],
+      "responses": [
+        "Career counseling sessions are conducted by the placement cell. Book appointments via the portal or attend scheduled workshops."
+      ]
+    },
+    {
+      "tag": "research_projects",
+      "patterns": [
+        "Current research projects in CSE",
+        "How to join a research lab?",
+        "Research papers by faculty",
+        "Project proposals submission",
+        "Internship in research projects",
+        "Research grants information",
+        "PhD project opportunities",
+        "Collaboration with industries",
+        "Lab resources availability",
+        "Guidelines for research work"
+      ],
+      "responses": [
+        "Details of ongoing research projects, lab access, and project proposals are available on the college research portal."
+      ]
+    },
+    {
+      "tag": "events_workshops",
+      "patterns": [
+        "Register for tech fest",
+        "Upcoming seminars",
+        "Cultural event schedule",
+        "Webinar registration",
+        "Workshop for CSE students",
+        "Guest lecture timings",
+        "Online event participation",
+        "Event notifications",
+        "Short-term workshops for PG",
+        "College fest details"
+      ],
+      "responses": [
+        "All college events and workshops can be registered via the student portal. Keep track of notifications for deadlines."
+      ]
+    },
+    {
+      "tag": "internship_industry_visit",
+      "patterns": [
+        "Available internships",
+        "Industry visit for students",
+        "Apply for internship",
+        "Internship deadlines",
+        "Companies offering internships",
+        "Short-term industrial training",
+        "Internship report submission",
+        "Internship certificate",
+        "Internship guidance",
+        "Industry mentor details"
+      ],
+      "responses": [
+        "Internships and industry visits are coordinated through the placement cell. Apply via the student portal and follow deadlines."
+      ]
+    },
+    {
+      "tag": "transport_services",
+      "patterns": [
+        "Campus shuttle timings",
+        "Bus routes from city",
+        "Parking facilities",
+        "Transport for hostel students",
+        "How to book shuttle?",
+        "Emergency transport support",
+        "Pick-up and drop timings",
+        "Faculty transport arrangements",
+        "Vehicle permits on campus",
+        "Transport help desk"
+      ],
+      "responses": [
+        "Arya College provides shuttle and transport services. Check the transport portal for routes, timings, and booking."
+      ]
+    },
+    {
+      "tag": "travel_tour_info",
+      "patterns": [
+        "Campus tour schedule",
+        "Online virtual campus tour",
+        "Nearby travel spots",
+        "Educational trips",
+        "Visit timings",
+        "Tour registration",
+        "Guided tour availability",
+        "Photography rules on campus",
+        "Travel guidelines for students",
+        "Tour packages for guests"
+      ],
+      "responses": [
+        "Campus tours and educational trips are organized by the student affairs office. Registration is available online."
+      ]
+    },
+    {
+      "tag": "emergency_contacts",
+      "patterns": [
+        "Medical emergency contact",
+        "Campus security number",
+        "Fire department contact",
+        "First aid on campus",
+        "Hostel emergency phone",
+        "Lost and found help",
+        "Accident reporting",
+        "Evacuation procedure",
+        "Police assistance",
+        "Health and safety queries"
+      ],
+      "responses": [
+        "Emergency contacts including medical, security, and fire are listed on the campus portal and displayed in hostels and common areas."
+      ]
+    },
+    {
+      "tag": "it_support",
+      "patterns": [
+        "Website not working",
+        "Portal error message",
+        "Software installation help",
+        "Online course playback issue",
+        "Wi-Fi connectivity problem",
+        "Email not syncing",
+        "VPN access for students",
+        "IT support contact",
+        "Reset lab computer password",
+        "Technical help desk"
+      ],
+      "responses": [
+        "IT support is available through the helpdesk portal or contact the IT team directly for any software or portal issues."
+      ]
+    },
+    {
+      "tag": "online_exam_rules",
+      "patterns": [
+        "Guidelines for online exam",
+        "Allowed materials during test",
+        "Online proctoring rules",
+        "Exam duration and timing",
+        "Submit answers online",
+        "Retake policy for exams",
+        "Technical requirements",
+        "Browser requirements",
+        "Exam integrity rules",
+        "Report issues during test"
+      ],
+      "responses": [
+        "Follow the online exam guidelines provided on the portal. Ensure your system meets technical requirements and submit within the allotted time."
+      ]
+    },
+    {
+      "tag": "hostel_leave_application",
+      "patterns": [
+        "Apply for hostel leave",
+        "Request overnight leave",
+        "Leave application form",
+        "How to submit hostel leave?",
+        "Leave approval process",
+        "Emergency leave request",
+        "Weekend leave procedure",
+        "Leave extension request",
+        "Cancel leave application",
+        "Contact warden for leave"
+      ],
+      "responses": [
+        "Hostel leave applications can be submitted through the hostel portal or by contacting the warden directly."
+      ]
+    },
+    {
+      "tag": "scholarship_status",
+      "patterns": [
+        "Check my scholarship status",
+        "Application approval for scholarship",
+        "Pending scholarship details",
+        "Merit scholarship confirmation",
+        "Sports scholarship status",
+        "Need-based scholarship update",
+        "Scholarship payment dates",
+        "Online course scholarship",
+        "How to follow up on scholarship?",
+        "Scholarship disbursement queries"
+      ],
+      "responses": [
+        "Check your scholarship status online via the student portal. Notifications are sent when the application is approved or processed."
+      ]
+    },
+    {
+      "tag": "alumni_event_registration",
+      "patterns": [
+        "Register for alumni meet",
+        "Alumni networking event",
+        "Join alumni seminar",
+        "Sign up for alumni webinar",
+        "Alumni guest lecture registration",
+        "RSVP for alumni gathering",
+        "Online alumni meetup",
+        "Alumni mentorship registration",
+        "Event notification for alumni",
+        "Alumni panel discussion sign up"
+      ],
+      "responses": [
+        "Alumni can register for events and webinars through the alumni portal. Keep track of notifications for deadlines and schedules."
+      ]
+    },
+    {
+      "tag": "mooc_certification_queries",
+      "patterns": [
+        "Certificate for completed MOOC",
+        "Verify online course certificate",
+        "Download MOOC certificate",
+        "Enrollment verification",
+        "Issue duplicate certificate",
+        "Certificate for short-term online course",
+        "MOOC grading policy",
+        "Completion requirement for certificate",
+        "Certificate validity",
+        "Accreditation info for online course"
+      ],
+      "responses": [
+        "MOOC certificates can be downloaded from the e-learning portal upon successful completion of the course. Verification is available online."
+      ]
+    }
+  ]
+}

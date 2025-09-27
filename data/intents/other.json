@@ -1,0 +1,18 @@
+{
+
+      "tag": "default",
+      "patterns": [],
+      "responses": [
+        "I'm sorry, I don't understand. Could you please rephrase that or ask something else?",
+        "That's a bit beyond my current capabilities. Can you try asking something else?",
+        "I'm not sure how to respond to that. Could you try asking in a different way?",
+        "I don't have a response for that. Could you be more specific or ask something else?",
+        "I'm not quite sure what you mean. Could you rephrase your question?",
+        "That's not something I can help with right now. Can you try asking something else?",
+        "I'm sorry, but I don't understand that request. Could you try asking differently?",
+        "That's outside my current knowledge. Can you ask something else?",
+        "I'm not sure how to help with that. Could you try a different question?",
+        "I don't have information about that. Can you ask something else?"
+      ]
+
+}
