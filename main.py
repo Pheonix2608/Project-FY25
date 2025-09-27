@@ -22,6 +22,7 @@ from utils.data_loader import load_all_intents
 from model.intent_classifier import IntentClassifier
 from model.response_handler import ResponseHandler
 from model.context_handler import ContextHandler
+from model.ner_extractor import NERExtractor
 from admin.panel import AdminPanel
 from utils.api_key_manager import APIKeyManager
 
@@ -54,6 +55,7 @@ class ChatbotApp:
         # Initialize Model Components
         self.intent_classifier = IntentClassifier(self.config)
         self.response_handler = ResponseHandler(self.data, self.config)
+        self.ner_extractor = NERExtractor()
         self.api_key_manager = APIKeyManager()
 
         # Set the chatbot app instance for the FastAPI server
@@ -138,8 +140,11 @@ class ChatbotApp:
         session = self.get_or_create_session(user_id)
         context_handler = session["context_handler"]
 
+        # Extract entities from the user input
+        entities = self.ner_extractor.extract_entities(user_input)
+
         if not user_input.strip():
-            return {"response": "Please type something to start our conversation.", "intent": "none", "confidence": 1.0}
+            return {"response": "Please type something to start our conversation.", "intent": "none", "confidence": 1.0, "entities": entities}
 
         # Handle Google Search confirmation flow
         if session["google_search_confirmation_pending"]:
@@ -154,7 +159,7 @@ class ChatbotApp:
                 context_handler.add_user_query(query)
                 context_handler.add_bot_response(response_text)
 
-                return {"response": response_text, "intent": "google_search", "confidence": 1.0}
+                return {"response": response_text, "intent": "google_search", "confidence": 1.0, "entities": entities}
             elif user_input.lower() in ['no', 'n']:
                 session["session_google_search_preference"] = False
                 session["google_search_confirmation_pending"] = False
@@ -162,10 +167,10 @@ class ChatbotApp:
                 response = "Okay, I won't search. How else can I help you?"
                 context_handler.add_user_query(user_input)
                 context_handler.add_bot_response(response)
-                return {"response": response, "intent": "default", "confidence": 1.0}
+                return {"response": response, "intent": "default", "confidence": 1.0, "entities": entities}
             else:
                 response = "Please answer with 'yes' or 'no'. Would you like me to search Google for an answer?"
-                return {"response": response, "intent": "unknown_google_confirm", "confidence": 1.0}
+                return {"response": response, "intent": "unknown_google_confirm", "confidence": 1.0, "entities": entities}
 
         context_handler.add_user_query(user_input)
         preprocessed_text = self.preprocessor.preprocess(user_input)
@@ -177,24 +182,24 @@ class ChatbotApp:
                 predicted_intent = "unknown"
         except Exception as e:
             logger.error(f"Prediction error: {e}")
-            return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0}
+            return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0, "entities": entities}
 
         if predicted_intent == "unknown":
             if session["session_google_search_preference"] is True:
                 response = self.response_handler.google_fallback(user_input)
             elif session["session_google_search_preference"] is False:
-                response = self.response_handler.get_response("default", 1.0, context_handler.get_context())
+                response = self.response_handler.get_response("default", 1.0, context_handler.get_context(), entities=entities)
             else:
                 session["google_search_confirmation_pending"] = True
                 session["last_unknown_query"] = user_input
                 response = "I'm not sure how to answer that. Would you like me to search Google for an answer? (yes/no)"
-                return {"response": response, "intent": "unknown_google_confirm", "confidence": confidence}
+                return {"response": response, "intent": "unknown_google_confirm", "confidence": confidence, "entities": entities}
         else:
-            response = self.response_handler.get_response(predicted_intent, confidence, context_handler.get_context())
+            response = self.response_handler.get_response(predicted_intent, confidence, context_handler.get_context(), entities=entities)
 
         context_handler.add_bot_response(response)
 
-        return {"response": response, "intent": predicted_intent, "confidence": confidence}
+        return {"response": response, "intent": predicted_intent, "confidence": confidence, "entities": entities}
 
     # ==================== API KEYS ====================
     def generate_api_key(self, user_id: str = "default_user") -> str:

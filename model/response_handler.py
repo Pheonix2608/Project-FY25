@@ -35,7 +35,7 @@ class ResponseHandler:
         }
         logger.info("Response handler initialized with rules-based responses.")
 
-    def get_response(self, intent_tag, confidence, context):
+    def get_response(self, intent_tag, confidence, context, entities=None):
         """
         Retrieves a random response for a given intent tag.
         
@@ -43,20 +43,27 @@ class ResponseHandler:
             intent_tag (str): The predicted intent tag from the classifier.
             confidence (float): The confidence score of the prediction.
             context (list): A list of recent queries and responses.
+            entities (list, optional): A list of extracted named entities.
             
         Returns:
             str: A randomly selected response string.
         """
-        logger.info(f"Getting response for intent '{intent_tag}' with confidence {confidence:.2f} and context: {context}")
+        logger.info(f"Getting response for intent '{intent_tag}' with confidence {confidence:.2f}, context: {context}, and entities: {entities}")
         
         # ----- Hooks for advanced generation (future) -----
         if self.config.ENABLE_GENERATIVE_RESPONSE:
             # This is a placeholder for a generative model response.
-            # A real implementation would require an asynchronous call to an API or a local model.
-            # Example using a placeholder function:
-            # return self._generate_llm_response(intent_tag, context)
             pass
         
+        # Personalize response if a person's name is detected
+        if entities:
+            for entity in entities:
+                if entity['label'] == 'PERSON':
+                    person_name = entity['text']
+                    # Example of using the name in a greeting
+                    if intent_tag == 'greeting':
+                         return f"Hello {person_name}! How can I help you today?"
+
         if intent_tag in ("unknown", "no_match"):
             logger.warning(f"Unknown intent detected. Returning default response.")
             self._log_unmatched_query(context[-1]['text'] if context else "unknown_query")

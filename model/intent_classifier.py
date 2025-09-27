@@ -7,7 +7,7 @@ import json
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import accuracy_score, classification_report
 import os
 
@@ -18,6 +18,7 @@ from torch.optim import AdamW # Import AdamW directly from PyTorch
 
 from utils.logger import get_logger
 from utils.data_loader import load_all_intents
+from utils.data_augmentation import augment_data
 
 logger = get_logger(__name__)
 
@@ -70,6 +71,11 @@ class SVMIntentClassifier:
 
     def train_model(self, data, preprocessor):
         logger.info("Starting SVM model training process...")
+
+        if getattr(self.config, 'USE_DATA_AUGMENTATION', False):
+            logger.info("Augmenting data...")
+            data = augment_data(data)
+
         patterns = []
         labels = []
         for intent in data['intents']:
@@ -96,29 +102,32 @@ class SVMIntentClassifier:
             stop_words='english'
         )
         
-        # Use stratified split to ensure all classes are represented
-        X_train, X_test, y_train, y_test = train_test_split(
-            patterns, labels, test_size=0.2, random_state=42, stratify=labels
-        )
+        X_vec = self.vectorizer.fit_transform(patterns)
+        y_np = np.array(labels)
+
+        # Cross-validation
+        n_splits = self.config.CROSS_VALIDATION_FOLDS if hasattr(self.config, 'CROSS_VALIDATION_FOLDS') else 5
+        skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
         
-        X_train_vec = self.vectorizer.fit_transform(X_train)
-        
-        # Improved SVM with better parameters
-        self.model = SVC(
-            kernel='rbf',
-            C=1.0,
-            gamma='scale',
-            probability=True,
-            random_state=42
-        )
-        self.model.fit(X_train_vec, y_train)
-        
-        X_test_vec = self.vectorizer.transform(X_test)
-        y_pred = self.model.predict(X_test_vec)
-        accuracy = accuracy_score(y_test, y_pred)
-        
-        logger.info(f"SVM Model training complete. Accuracy on test data: {accuracy:.2f}")
-        logger.info("Classification Report:\n" + classification_report(y_test, y_pred, zero_division=0))
+        accuracies = []
+        for fold, (train_index, test_index) in enumerate(skf.split(X_vec, y_np)):
+            X_train, X_test = X_vec[train_index], X_vec[test_index]
+            y_train, y_test = y_np[train_index], y_np[test_index]
+
+            model = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True, random_state=42)
+            model.fit(X_train, y_train)
+
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            accuracies.append(accuracy)
+            logger.info(f"Fold {fold+1}/{n_splits} Accuracy: {accuracy:.2f}")
+
+        logger.info(f"Average Cross-Validation Accuracy: {np.mean(accuracies):.2f}")
+
+        # Retrain on the full dataset
+        logger.info("Retraining SVM model on the entire dataset...")
+        self.model = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True, random_state=42)
+        self.model.fit(X_vec, y_np)
 
         try:
             # Ensure models directory exists
@@ -195,6 +204,11 @@ class BertIntentClassifier:
 
     def train_model(self, data, preprocessor):
         logger.info("Starting BERT model training process...")
+
+        if getattr(self.config, 'USE_DATA_AUGMENTATION', False):
+            logger.info("Augmenting data...")
+            data = augment_data(data)
+
         patterns = []
         labels = []
         for intent in data['intents']:
@@ -213,60 +227,82 @@ class BertIntentClassifier:
         self.intents = sorted(list(set(labels)))
         self.label_map = {tag: i for i, tag in enumerate(self.intents)}
         
-        # Prepare dataset
-        X_train, X_test, y_train, y_test = train_test_split(
-            patterns, labels, test_size=0.2, random_state=42, stratify=labels
-        )
+        # Cross-validation for BERT
+        n_splits = self.config.CROSS_VALIDATION_FOLDS if hasattr(self.config, 'CROSS_VALIDATION_FOLDS') else 5
+        skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
         
-        train_dataset = IntentDataset(X_train, y_train, self.tokenizer, self.label_map)
-        test_dataset = IntentDataset(X_test, y_test, self.tokenizer, self.label_map)
+        patterns_np = np.array(patterns)
+        labels_np = np.array(labels)
         
-        train_loader = DataLoader(train_dataset, batch_size=self.config.BERT_BATCH_SIZE, shuffle=True)
+        fold_accuracies = []
+        for fold, (train_index, test_index) in enumerate(skf.split(patterns_np, labels_np)):
+            logger.info(f"--- Fold {fold+1}/{n_splits} ---")
+            X_train, X_test = patterns_np[train_index], patterns_np[test_index]
+            y_train, y_test = labels_np[train_index], labels_np[test_index]
+
+            train_dataset = IntentDataset(X_train, y_train, self.tokenizer, self.label_map)
+            test_dataset = IntentDataset(X_test, y_test, self.tokenizer, self.label_map)
+
+            train_loader = DataLoader(train_dataset, batch_size=self.config.BERT_BATCH_SIZE, shuffle=True)
+            test_loader = DataLoader(test_dataset, batch_size=self.config.BERT_BATCH_SIZE)
+
+            model = BertForSequenceClassification.from_pretrained(self.config.BERT_MODEL_PATH, num_labels=len(self.intents))
+            model.to(self.device)
+            optimizer = AdamW(model.parameters(), lr=self.config.BERT_LEARNING_RATE)
+
+            # Training loop for the fold
+            model.train()
+            for epoch in range(self.config.BERT_EPOCHS):
+                for batch in train_loader:
+                    optimizer.zero_grad()
+                    input_ids = batch['input_ids'].to(self.device)
+                    attention_mask = batch['attention_mask'].to(self.device)
+                    labels = batch['labels'].to(self.device)
+                    outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+                    loss = outputs.loss
+                    loss.backward()
+                    optimizer.step()
+
+            # Evaluation for the fold
+            model.eval()
+            true_labels, predictions = [], []
+            with torch.no_grad():
+                for batch in test_loader:
+                    input_ids = batch['input_ids'].to(self.device)
+                    attention_mask = batch['attention_mask'].to(self.device)
+                    labels = batch['labels'].to(self.device)
+                    outputs = model(input_ids, attention_mask=attention_mask)
+                    logits = outputs.logits
+                    preds = torch.argmax(logits, dim=1).cpu().numpy()
+                    true_labels.extend(labels.cpu().numpy())
+                    predictions.extend(preds)
+
+            accuracy = accuracy_score(true_labels, predictions)
+            fold_accuracies.append(accuracy)
+            logger.info(f"Fold {fold+1} Accuracy: {accuracy:.2f}")
+
+        logger.info(f"Average BERT Cross-Validation Accuracy: {np.mean(fold_accuracies):.2f}")
+
+        # Retrain on the full dataset
+        logger.info("Retraining BERT model on the entire dataset...")
+        full_dataset = IntentDataset(patterns, labels, self.tokenizer, self.label_map)
+        full_loader = DataLoader(full_dataset, batch_size=self.config.BERT_BATCH_SIZE, shuffle=True)
         
-        # Initialize BERT model
-        self.model = BertForSequenceClassification.from_pretrained(
-            self.config.BERT_MODEL_PATH, num_labels=len(self.intents)
-        )
+        self.model = BertForSequenceClassification.from_pretrained(self.config.BERT_MODEL_PATH, num_labels=len(self.intents))
         self.model.to(self.device)
-        
         optimizer = AdamW(self.model.parameters(), lr=self.config.BERT_LEARNING_RATE)
         
-        # Training loop
         self.model.train()
         for epoch in range(self.config.BERT_EPOCHS):
-            for batch in train_loader:
+            for batch in full_loader:
                 optimizer.zero_grad()
                 input_ids = batch['input_ids'].to(self.device)
                 attention_mask = batch['attention_mask'].to(self.device)
                 labels = batch['labels'].to(self.device)
-                
                 outputs = self.model(input_ids, attention_mask=attention_mask, labels=labels)
                 loss = outputs.loss
                 loss.backward()
                 optimizer.step()
-            logger.info(f"Epoch {epoch+1}/{self.config.BERT_EPOCHS}, Loss: {loss.item():.4f}")
-
-        # Evaluation (optional)
-        self.model.eval()
-        true_labels = []
-        predictions = []
-        test_loader = DataLoader(test_dataset, batch_size=self.config.BERT_BATCH_SIZE)
-        with torch.no_grad():
-            for batch in test_loader:
-                input_ids = batch['input_ids'].to(self.device)
-                attention_mask = batch['attention_mask'].to(self.device)
-                labels = batch['labels'].to(self.device)
-                
-                outputs = self.model(input_ids, attention_mask=attention_mask)
-                logits = outputs.logits
-                preds = torch.argmax(logits, dim=1).cpu().numpy()
-                
-                true_labels.extend(labels.cpu().numpy())
-                predictions.extend(preds)
-
-        accuracy = accuracy_score(true_labels, predictions)
-        logger.info(f"BERT Model training complete. Accuracy on test data: {accuracy:.2f}")
-        logger.info("Classification Report:\n" + classification_report(true_labels, predictions, zero_division=0))
 
         # Save model
         try:

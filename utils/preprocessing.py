@@ -11,29 +11,38 @@ import os
 
 from utils.logger import get_logger
 
-import nltk
-from urllib.error import URLError
+# Set up a logger for this module
+logger = get_logger(__name__)
 
-resources = {
-    'corpora/wordnet': 'wordnet',
-    'corpora/stopwords': 'stopwords',
-    'tokenizers/punkt': 'punkt',
-    'taggers/averaged_perceptron_tagger': 'averaged_perceptron_tagger'
+# --- NLTK Resource Management ---
+def download_nltk_resource(resource_name, resource_path):
+    """
+    Downloads an NLTK resource if it's not already present.
+    """
+    try:
+        nltk.data.find(resource_path)
+        logger.debug(f"NLTK resource '{resource_name}' found.")
+    except LookupError:
+        logger.info(f"NLTK resource '{resource_name}' not found. Downloading...")
+        try:
+            nltk.download(resource_name, quiet=True)
+            logger.info(f"Successfully downloaded NLTK resource: {resource_name}")
+        except Exception as e:
+            logger.error(f"Failed to download NLTK resource '{resource_name}': {e}", exc_info=True)
+            # Depending on the resource, you might want to exit or raise an exception
+            # For now, we'll log the error and continue.
+
+# List of required NLTK resources and their paths
+REQUIRED_NLTK_RESOURCES = {
+    'punkt': 'tokenizers/punkt',
+    'wordnet': 'corpora/wordnet',
+    'stopwords': 'corpora/stopwords',
+    'averaged_perceptron_tagger': 'taggers/averaged_perceptron_tagger',
 }
 
-for path, name in resources.items():
-    try:
-        nltk.data.find(path)
-    except LookupError:
-        try:
-            print(f"Downloading missing resource: {name}")
-            nltk.download(name)
-        except URLError as e:
-            print(f"Network error while downloading {name}: {e}")
-        except Exception as e:
-            print(f"Unexpected error while downloading {name}: {e}")
-
-logger = get_logger(__name__)
+# Download all required resources at startup
+for name, path in REQUIRED_NLTK_RESOURCES.items():
+    download_nltk_resource(name, path)
 
 class TextPreprocessor:
     """
