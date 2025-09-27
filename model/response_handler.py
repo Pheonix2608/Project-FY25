@@ -87,13 +87,13 @@ class ResponseHandler:
         })
         return random.choice(self.default_responses)
 
-    def google_fallback(self, context):
+    def google_fallback(self, query: str):
         """Performs a Google search and returns the results, with a confirmation message."""
         logger.info({
             'event': 'response_source',
             'source': 'google_fallback'
         })
-        user_query = context[-1]['text'] if context else ""
+        user_query = query
         import asyncio
         from utils.web_search import query_google
         loop = asyncio.get_event_loop()

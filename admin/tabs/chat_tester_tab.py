@@ -174,26 +174,31 @@ class ChatTesterTab(QWidget):
         self.refresh_sessions_sidebar()
         self.setup_context_menus()
 
-    def send_message(self):
-        user_input = self.input_field.text().strip()
+    def send_message(self, text=None):
+        user_input = text if text is not None else self.input_field.text().strip()
         if not user_input:
             return
 
-        self.display_message("User", user_input)
-        self.input_field.clear()
-        self.clear_confirmation_buttons()  # Clear buttons on new message
+        if text is None:
+            self.display_message("User", user_input)
+            self.input_field.clear()
 
-        response_data = self.app_instance.process_input(user_input)
+        self.clear_confirmation_buttons()
 
-        if response_data.get("action") == "confirm_google_search":
-            self.display_message("Bot", response_data["response"])
+        # For the admin panel, we can use a fixed user_id
+        admin_user_id = "admin_user"
+        response_data = self.app_instance.process_input(admin_user_id, user_input)
+
+        response = response_data.get("response", "Sorry, something went wrong.")
+        confidence = response_data.get("confidence", 0.0)
+        intent = response_data.get("intent", "unknown")
+
+        self.display_message("Bot", response)
+
+        if intent == "unknown_google_confirm":
             self.show_google_search_confirmation()
-        else:
-            response = response_data.get("response", "Sorry, something went wrong.")
-            confidence = response_data.get("confidence", 0.0)
-            intent = response_data.get("intent", "unknown")
-
-            response_with_confidence = f"{response} (Intent: {intent}, Confidence: {confidence:.2%})"
+        elif intent not in ["google_search", "default"]:
+            response_with_confidence = f" (Intent: {intent}, Confidence: {confidence:.2%})"
             self.display_message("Bot", response_with_confidence)
 
     def show_google_search_confirmation(self):
@@ -210,18 +215,12 @@ class ChatTesterTab(QWidget):
         self.confirmation_buttons_layout.addWidget(no_button)
 
     def handle_google_search_yes(self):
-        """Handles the user clicking 'Yes' to a Google search."""
-        self.clear_confirmation_buttons()
-        self.display_message("Bot", "Okay, searching Google for you...")
-
-        response_data = self.app_instance.search_last_unknown_query()
-        response = response_data.get("response", "Sorry, the search failed.")
-        self.display_message("Bot", response)
+        """Handles the user clicking 'Yes' by sending 'yes' as the next message."""
+        self.send_message(text="yes")
 
     def handle_google_search_no(self):
-        """Handles the user clicking 'No' to a Google search."""
-        self.clear_confirmation_buttons()
-        self.display_message("Bot", "Okay, I won't search. How else can I help?")
+        """Handles the user clicking 'No' by sending 'no' as the next message."""
+        self.send_message(text="no")
 
     def display_message(self, sender, message):
         timestamp = datetime.now().strftime("%H:%M:%S")

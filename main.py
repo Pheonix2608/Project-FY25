@@ -11,8 +11,8 @@ import torch
 from datetime import datetime
 from PyQt6.QtWidgets import QApplication
 import threading
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import uvicorn
+from api.server import app as fastapi_app, set_chatbot_app
 
 # Import project modules
 from config import Config
@@ -47,16 +47,17 @@ class ChatbotApp:
         # Initialize Data and Preprocessing
         self.data = self._load_data(self.config.DATA_PATH)
         self.preprocessor = TextPreprocessor(self.config)
-        self.context_handler = ContextHandler(self.config.CONTEXT_WINDOW_SIZE)
+
+        # Session management
+        self.user_sessions = {}
 
         # Initialize Model Components
         self.intent_classifier = IntentClassifier(self.config)
         self.response_handler = ResponseHandler(self.data, self.config)
         self.api_key_manager = APIKeyManager()
-        self._httpd = None
-        self._api_thread = None
-        
-        self.last_unknown_query = None
+
+        # Set the chatbot app instance for the FastAPI server
+        set_chatbot_app(self)
 
         # Database is initialized in the main block
 
@@ -92,6 +93,20 @@ class ChatbotApp:
         except Exception as e:
             logger.error(f"Failed to start API server: {e}")
 
+    def get_or_create_session(self, user_id: str):
+        """
+        Retrieves an existing session for a user or creates a new one.
+        """
+        if user_id not in self.user_sessions:
+            self.user_sessions[user_id] = {
+                "context_handler": ContextHandler(self.config.CONTEXT_WINDOW_SIZE),
+                "google_search_confirmation_pending": False,
+                "session_google_search_preference": None,
+                "last_unknown_query": None,
+            }
+            logger.info(f"Created new session for user_id: {user_id}")
+        return self.user_sessions[user_id]
+
     def _load_data(self, file_path):
         """
         Loads the intents and responses data from the intents directory.
@@ -116,24 +131,47 @@ class ChatbotApp:
             logger.error(f"Error decoding JSON intents: {e}")
             return {"intents": []}
             
-    def process_input(self, user_input):
+    def process_input(self, user_id: str, user_input: str):
         """
-        Handles user input, processes it, and generates a response.
-        
-        Args:
-            user_input (str): The raw text input from the user.
-        
-        Returns:
-            dict: A dictionary containing the response and other metadata.
+        Handles user input, processes it, and generates a response for a specific user.
         """
+        session = self.get_or_create_session(user_id)
+        context_handler = session["context_handler"]
+
         if not user_input.strip():
             return {"response": "Please type something to start our conversation.", "intent": "none", "confidence": 1.0}
 
-        self.context_handler.add_user_query(user_input)
+        # Handle Google Search confirmation flow
+        if session["google_search_confirmation_pending"]:
+            if user_input.lower() in ['yes', 'y']:
+                session["session_google_search_preference"] = True
+                session["google_search_confirmation_pending"] = False
+                query = session["last_unknown_query"]
+                session["last_unknown_query"] = None
+
+                response_text = self.response_handler.google_fallback(query)
+
+                context_handler.add_user_query(query)
+                context_handler.add_bot_response(response_text)
+
+                return {"response": response_text, "intent": "google_search", "confidence": 1.0}
+            elif user_input.lower() in ['no', 'n']:
+                session["session_google_search_preference"] = False
+                session["google_search_confirmation_pending"] = False
+                session["last_unknown_query"] = None
+                response = "Okay, I won't search. How else can I help you?"
+                context_handler.add_user_query(user_input)
+                context_handler.add_bot_response(response)
+                return {"response": response, "intent": "default", "confidence": 1.0}
+            else:
+                response = "Please answer with 'yes' or 'no'. Would you like me to search Google for an answer?"
+                return {"response": response, "intent": "unknown_google_confirm", "confidence": 1.0}
+
+        context_handler.add_user_query(user_input)
         preprocessed_text = self.preprocessor.preprocess(user_input)
+
         try:
             predicted_intent, confidence = self.intent_classifier.predict_intent(preprocessed_text)
-            # If confidence is below the threshold, classify as 'unknown'
             if confidence < self.config.CONFIDENCE_THRESHOLD:
                 logger.info(f"Confidence {confidence:.2f} is below threshold {self.config.CONFIDENCE_THRESHOLD}. Intent classified as 'unknown'.")
                 predicted_intent = "unknown"
@@ -142,33 +180,21 @@ class ChatbotApp:
             return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0}
 
         if predicted_intent == "unknown":
-            self.last_unknown_query = user_input
-            return {
-                "response": "I'm not sure how to answer that. Would you like me to search Google for an answer?",
-                "intent": "unknown",
-                "confidence": confidence,
-                "action": "confirm_google_search"
-            }
+            if session["session_google_search_preference"] is True:
+                response = self.response_handler.google_fallback(user_input)
+            elif session["session_google_search_preference"] is False:
+                response = self.response_handler.get_response("default", 1.0, context_handler.get_context())
+            else:
+                session["google_search_confirmation_pending"] = True
+                session["last_unknown_query"] = user_input
+                response = "I'm not sure how to answer that. Would you like me to search Google for an answer? (yes/no)"
+                return {"response": response, "intent": "unknown_google_confirm", "confidence": confidence}
+        else:
+            response = self.response_handler.get_response(predicted_intent, confidence, context_handler.get_context())
 
-        response = self.response_handler.get_response(predicted_intent, confidence, self.context_handler.get_context())
-        self.context_handler.add_bot_response(response)
+        context_handler.add_bot_response(response)
 
         return {"response": response, "intent": predicted_intent, "confidence": confidence}
-
-    def search_last_unknown_query(self):
-        """
-        Performs a Google search on the last query that was classified as 'unknown'.
-        """
-        if not self.last_unknown_query:
-            return {"response": "Error: No query to search.", "intent": "error", "confidence": 0.0}
-
-        context = [{'role': 'user', 'text': self.last_unknown_query}]
-        response_text = self.response_handler.google_fallback(context)
-
-        self.context_handler.add_bot_response(response_text)
-        self.last_unknown_query = None
-
-        return {"response": response_text, "intent": "google_search", "confidence": 1.0}
 
     # ==================== API KEYS ====================
     def generate_api_key(self, user_id: str = "default_user") -> str:
@@ -186,105 +212,33 @@ class ChatbotApp:
 
     # ==================== HTTP API ====================
     def start_api_server(self):
-        host = getattr(self.config, 'API_HOST', '0.0.0.0')
-        port = getattr(self.config, 'API_PORT', 8080)
-
-        app_ref = self
-
-        class ChatRequestHandler(BaseHTTPRequestHandler):
-            def _send_json(self, code, payload):
-                try:
-                    body = json.dumps(payload).encode('utf-8')
-                except Exception:
-                    body = b"{}"
-                self.send_response(code)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Content-Length', str(len(body)))
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-API-Key')
-                self.end_headers()
-                self.wfile.write(body)
-
-            def do_GET(self):
-                if self.path == '/':
-                    return self._send_json(200, {
-                        "status": "ok",
-                        "message": "Chatbot API running",
-                        "endpoints": [
-                            {"path": "/chat", "method": "POST", "headers": ["X-API-Key"], "body": {"message": "string"}}
-                        ]
-                    })
-                if self.path == '/chat':
-                    return self._send_json(405, {"error": "Method Not Allowed", "use": "POST /chat"})
-                return self._send_json(404, {"error": "Not Found"})
-
-            def do_OPTIONS(self):
-                self.send_response(204)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-                self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-API-Key')
-                self.end_headers()
-
-            def do_POST(self):
-                try:
-                    if self.path != '/chat':
-                        return self._send_json(404, {"error": "Not Found"})
-
-                    content_length = int(self.headers.get('Content-Length', '0'))
-                    raw = self.rfile.read(content_length) if content_length > 0 else b"{}"
-                    try:
-                        payload = json.loads(raw.decode('utf-8'))
-                    except Exception:
-                        return self._send_json(400, {"error": "Invalid JSON"})
-
-                    api_key = self.headers.get('X-API-Key') or payload.get('api_key')
-                    message = payload.get('message', '')
-
-                    if not api_key:
-                        return self._send_json(401, {"error": "Missing API key"})
-                    if not message:
-                        return self._send_json(400, {"error": "Missing message"})
-
-                    user_id = app_ref.api_key_manager.verify_api_key(api_key)
-                    if not user_id:
-                        return self._send_json(403, {"error": "Invalid or expired API key"})
-
-                    # Process input using the app's pipeline
-                    response_data = app_ref.process_input(message)
-
-                    # Log the API session
-                    app_ref.log_api_session(user_id, api_key, payload, response_data)
-
-                    return self._send_json(200, {
-                        "user_id": user_id,
-                        "response": response_data.get("response"),
-                        "intent": response_data.get("intent"),
-                        "confidence": response_data.get("confidence")
-                    })
-                except Exception as e:
-                    logger.error(f"API error: {e}")
-                    return self._send_json(500, {"error": "Internal Server Error"})
-
-        # Create server bound to host:port
-        self._httpd = HTTPServer((host, port), ChatRequestHandler)
-
-        def serve():
-            try:
-                self._httpd.serve_forever()
-            except Exception as e:
-                logger.error(f"HTTP server stopped: {e}")
-
-        self._api_thread = threading.Thread(target=serve, daemon=True)
+        """
+        Starts the FastAPI server in a background thread.
+        """
+        config = uvicorn.Config(
+            fastapi_app,
+            host=getattr(self.config, 'API_HOST', '0.0.0.0'),
+            port=getattr(self.config, 'API_PORT', 8080),
+            log_level="info",
+            timeout_keep_alive=5
+        )
+        self.server = uvicorn.Server(config)
+        self._api_thread = threading.Thread(target=self.server.run, daemon=False)
         self._api_thread.start()
 
     def stop_api_server(self):
-        try:
-            if self._httpd:
-                self._httpd.shutdown()
-                self._httpd.server_close()
-                self._httpd = None
-        except Exception:
-            pass
+        """
+        Stops the FastAPI server gracefully.
+
+        This works in conjunction with the `timeout_keep_alive` setting in the
+        uvicorn config. The `should_exit` flag is polled by the server loop,
+        which is guaranteed to unblock every `timeout_keep_alive` seconds.
+        """
+        if hasattr(self, 'server'):
+            self.server.should_exit = True
+            if hasattr(self, '_api_thread'):
+                self._api_thread.join(timeout=6)
+                logger.info("API server thread joined.")
 
     def log_api_session(self, user_id, api_key, request_data, response_data):
         """Logs an API session to the database."""
@@ -405,13 +359,19 @@ class ChatbotApp:
 
     def run(self):
         """
-        Starts the main event loop of the application.
+        Starts the main event loop of the application and handles graceful shutdown.
         """
-        # sys.exit(self.app.exec())
-        # Keep the main thread alive
-        while True:
-            import time
-            time.sleep(1)
+        try:
+            # Keep the main thread alive
+            while True:
+                import time
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("Shutdown signal received.")
+        finally:
+            logger.info("Shutting down API server...")
+            self.stop_api_server()
+            logger.info("Application shut down.")
 
 if __name__ == '__main__':
     bot = ChatbotApp()

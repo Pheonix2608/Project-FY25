@@ -11,6 +11,7 @@ from admin.tabs.api_key_management_tab import ApiKeyManagementTab
 from admin.tabs.api_session_viewer_tab import ApiSessionViewerTab
 from admin.tabs.settings_tab import SettingsTab
 from admin.tabs.system_stats_tab import SystemStatsTab
+from admin.tabs.log_viewer_tab import LogViewerTab
 
 class AdminPanel(QWidget):
     def apply_dark_mode(self, enabled):
@@ -61,12 +62,14 @@ class AdminPanel(QWidget):
         self.api_session_viewer_tab = ApiSessionViewerTab()
         self.settings_tab = SettingsTab(self.app_instance)
         self.system_stats_tab = SystemStatsTab()
+        self.log_viewer_tab = LogViewerTab(self.config.LOG_DIR)
 
         self.tabs.addTab(self.chat_tester_tab, "Chat Tester")
         self.tabs.addTab(self.api_key_management_tab, "API Key Management")
         self.tabs.addTab(self.api_session_viewer_tab, "API Session Viewer")
         self.tabs.addTab(self.settings_tab, "Settings")
         self.tabs.addTab(self.system_stats_tab, "System Stats")
+        self.tabs.addTab(self.log_viewer_tab, "Log Viewer")
 
         self.setLayout(layout)
 

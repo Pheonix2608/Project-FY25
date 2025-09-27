@@ -22,6 +22,8 @@ logs/
 # Data and models
 *.pkl
 *.h5
+*.db
+*.db-journal
 
 
 # Models
