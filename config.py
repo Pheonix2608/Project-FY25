@@ -46,6 +46,9 @@ class Config:
     
     # Context Handler
     CONTEXT_WINDOW_SIZE = 3
+
+    # Confidence threshold for intent classification
+    CONFIDENCE_THRESHOLD = 0.6
     
     # Enable generative model response hook
     ENABLE_GENERATIVE_RESPONSE = False

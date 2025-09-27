@@ -58,13 +58,9 @@ class ResponseHandler:
             pass
         
         if intent_tag in ("unknown", "no_match"):
-            logger.warning(f"Unknown intent detected. Logging query for retraining.")
+            logger.warning(f"Unknown intent detected. Returning default response.")
             self._log_unmatched_query(context[-1]['text'] if context else "unknown_query")
-            if self.config.ENABLE_GOOGLE_FALLBACK:
-                logger.info("Unknown intent, falling back to Google Search.")
-                return self.google_fallback(context)
-            else:
-                return random.choice(self.default_responses)
+            return random.choice(self.default_responses)
         
         # Handle explicit default tag without warning
         if intent_tag == 'default':

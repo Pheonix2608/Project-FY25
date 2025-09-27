@@ -56,6 +56,8 @@ class ChatbotApp:
         self._httpd = None
         self._api_thread = None
         
+        self.last_unknown_query = None
+
         # Database is initialized in the main block
 
         # Load or train the model
@@ -131,14 +133,42 @@ class ChatbotApp:
         preprocessed_text = self.preprocessor.preprocess(user_input)
         try:
             predicted_intent, confidence = self.intent_classifier.predict_intent(preprocessed_text)
+            # If confidence is below the threshold, classify as 'unknown'
+            if confidence < self.config.CONFIDENCE_THRESHOLD:
+                logger.info(f"Confidence {confidence:.2f} is below threshold {self.config.CONFIDENCE_THRESHOLD}. Intent classified as 'unknown'.")
+                predicted_intent = "unknown"
         except Exception as e:
             logger.error(f"Prediction error: {e}")
             return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0}
+
+        if predicted_intent == "unknown":
+            self.last_unknown_query = user_input
+            return {
+                "response": "I'm not sure how to answer that. Would you like me to search Google for an answer?",
+                "intent": "unknown",
+                "confidence": confidence,
+                "action": "confirm_google_search"
+            }
 
         response = self.response_handler.get_response(predicted_intent, confidence, self.context_handler.get_context())
         self.context_handler.add_bot_response(response)
 
         return {"response": response, "intent": predicted_intent, "confidence": confidence}
+
+    def search_last_unknown_query(self):
+        """
+        Performs a Google search on the last query that was classified as 'unknown'.
+        """
+        if not self.last_unknown_query:
+            return {"response": "Error: No query to search.", "intent": "error", "confidence": 0.0}
+
+        context = [{'role': 'user', 'text': self.last_unknown_query}]
+        response_text = self.response_handler.google_fallback(context)
+
+        self.context_handler.add_bot_response(response_text)
+        self.last_unknown_query = None
+
+        return {"response": response_text, "intent": "google_search", "confidence": 1.0}
 
     # ==================== API KEYS ====================
     def generate_api_key(self, user_id: str = "default_user") -> str:

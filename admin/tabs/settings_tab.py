@@ -2,7 +2,7 @@
 
 from PyQt6.QtWidgets import (
     QWidget, QFormLayout, QPushButton,
-    QLabel, QCheckBox
+    QLabel, QCheckBox, QDoubleSpinBox
 )
 from PyQt6.QtCore import Qt
 
@@ -26,6 +26,14 @@ class SettingsTab(QWidget):
         layout.addRow(QLabel("Model Training:"), self.retrain_button)
         layout.addRow(None, self.retrain_bg_button)
 
+        # Confidence Threshold
+        self.confidence_threshold_spinner = QDoubleSpinBox()
+        self.confidence_threshold_spinner.setRange(0.0, 1.0)
+        self.confidence_threshold_spinner.setSingleStep(0.05)
+        self.confidence_threshold_spinner.setValue(self.config.CONFIDENCE_THRESHOLD)
+        self.confidence_threshold_spinner.valueChanged.connect(self.update_confidence_threshold)
+        layout.addRow(QLabel("Confidence Threshold:"), self.confidence_threshold_spinner)
+
         # Google Search toggle
         self.google_search_toggle = QCheckBox("Enable Google Search Fallback")
         self.google_search_toggle.setChecked(self.config.ENABLE_GOOGLE_FALLBACK)
@@ -40,6 +48,11 @@ class SettingsTab(QWidget):
         layout.addRow(QLabel("Appearance:"), self.dark_mode_toggle)
 
         self.setLayout(layout)
+
+    def update_confidence_threshold(self, value):
+        """Updates the confidence threshold in the config."""
+        self.config.CONFIDENCE_THRESHOLD = value
+        print(f"Confidence threshold updated to: {value}")
 
     def toggle_google_search(self, state):
         is_enabled = state == Qt.CheckState.Checked.value

@@ -139,9 +139,20 @@ class ChatTesterTab(QWidget):
         input_layout.addWidget(self.input_field)
         input_layout.addWidget(self.send_button)
 
+        self.confirmation_buttons_layout = QHBoxLayout()
+
         chat_layout.addLayout(toolbar)
         chat_layout.addWidget(self.chat_display)
         chat_layout.addLayout(input_layout)
+        chat_layout.addLayout(self.confirmation_buttons_layout)
+
+    def clear_confirmation_buttons(self):
+        """Removes all widgets from the confirmation buttons layout."""
+        while self.confirmation_buttons_layout.count():
+            item = self.confirmation_buttons_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         main_splitter.addWidget(chat_area)
         main_splitter.setStretchFactor(1, 1)
@@ -170,14 +181,47 @@ class ChatTesterTab(QWidget):
 
         self.display_message("User", user_input)
         self.input_field.clear()
+        self.clear_confirmation_buttons()  # Clear buttons on new message
 
         response_data = self.app_instance.process_input(user_input)
-        response = response_data.get("response", "Sorry, something went wrong.")
-        confidence = response_data.get("confidence", 0.0)
-        intent = response_data.get("intent", "unknown")
 
-        response_with_confidence = f"{response} (Intent: {intent}, Confidence: {confidence:.2%})"
-        self.display_message("Bot", response_with_confidence)
+        if response_data.get("action") == "confirm_google_search":
+            self.display_message("Bot", response_data["response"])
+            self.show_google_search_confirmation()
+        else:
+            response = response_data.get("response", "Sorry, something went wrong.")
+            confidence = response_data.get("confidence", 0.0)
+            intent = response_data.get("intent", "unknown")
+
+            response_with_confidence = f"{response} (Intent: {intent}, Confidence: {confidence:.2%})"
+            self.display_message("Bot", response_with_confidence)
+
+    def show_google_search_confirmation(self):
+        """Displays Yes/No buttons for Google Search confirmation."""
+        self.clear_confirmation_buttons()
+
+        yes_button = QPushButton("Yes, search Google")
+        no_button = QPushButton("No, thank you")
+
+        yes_button.clicked.connect(self.handle_google_search_yes)
+        no_button.clicked.connect(self.handle_google_search_no)
+
+        self.confirmation_buttons_layout.addWidget(yes_button)
+        self.confirmation_buttons_layout.addWidget(no_button)
+
+    def handle_google_search_yes(self):
+        """Handles the user clicking 'Yes' to a Google search."""
+        self.clear_confirmation_buttons()
+        self.display_message("Bot", "Okay, searching Google for you...")
+
+        response_data = self.app_instance.search_last_unknown_query()
+        response = response_data.get("response", "Sorry, the search failed.")
+        self.display_message("Bot", response)
+
+    def handle_google_search_no(self):
+        """Handles the user clicking 'No' to a Google search."""
+        self.clear_confirmation_buttons()
+        self.display_message("Bot", "Okay, I won't search. How else can I help?")
 
     def display_message(self, sender, message):
         timestamp = datetime.now().strftime("%H:%M:%S")
