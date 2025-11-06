@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView,
     QLabel, QLineEdit, QMessageBox
 )
+from PyQt6.QtCore import Qt
 from utils.database import get_db_connection
 
 class ApiSessionViewerTab(QWidget):
@@ -12,6 +13,44 @@ class ApiSessionViewerTab(QWidget):
         super().__init__()
         self.init_ui()
         self.refresh_api_sessions_tab()
+        
+    def update_table_style(self):
+        """Updates table styling based on current theme."""
+        # Get dark mode setting from parent widget's window
+        window = self.window()
+        is_dark = False
+        if hasattr(window, 'app_instance') and hasattr(window.app_instance.config, 'DARK_MODE'):
+            is_dark = window.app_instance.config.DARK_MODE
+        
+        if is_dark:
+            header_style = """
+                QHeaderView::section {
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    padding: 5px;
+                    border: 1px solid #3d3d3d;
+                }
+                QTableView {
+                    gridline-color: #3d3d3d;
+                    border: 1px solid #3d3d3d;
+                }
+            """
+        else:
+            header_style = """
+                QHeaderView::section {
+                    background-color: #f0f0f0;
+                    color: #000000;
+                    padding: 5px;
+                    border: 1px solid #ddd;
+                }
+                QTableView {
+                    gridline-color: #ddd;
+                    border: 1px solid #ddd;
+                }
+            """
+        
+        self.api_sessions_table.horizontalHeader().setStyleSheet(header_style)
+        self.api_sessions_table.verticalHeader().setStyleSheet(header_style)
 
     def init_ui(self):
         layout = QVBoxLayout(self)
@@ -26,6 +65,9 @@ class ApiSessionViewerTab(QWidget):
         self.api_sessions_table.setColumnCount(4)
         self.api_sessions_table.setHorizontalHeaderLabels(["Timestamp", "User ID", "Request", "Response"])
         self.api_sessions_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        
+        # Apply the initial styling
+        self.update_table_style()
 
         self.refresh_sessions_button = QPushButton("Refresh")
         self.refresh_sessions_button.clicked.connect(self.refresh_api_sessions_tab)

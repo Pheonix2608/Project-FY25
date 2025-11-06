@@ -1,7 +1,12 @@
+"""
+Database connection management module.
+"""
 import sqlite3
 import os
 from datetime import datetime
+from utils.logger import get_logger
 
+logger = get_logger(__name__)
 DB_FILE = os.path.join('data', 'chatbot.db')
 os.makedirs(os.path.dirname(DB_FILE), exist_ok=True)
 
@@ -11,37 +16,8 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def initialize_database():
-    """Initializes the database and creates tables if they don't exist."""
+# Ensure database exists
+if not os.path.exists(DB_FILE):
+    logger.info("Database file not found. Please run migrate.py to initialize the database.")
     with get_db_connection() as conn:
-        cursor = conn.cursor()
-
-        # Create api_keys table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS api_keys (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                key_hash TEXT NOT NULL,
-                user_id TEXT NOT NULL UNIQUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                expires_at TIMESTAMP,
-                rate_limit_per_minute INTEGER DEFAULT 60,
-                rate_limit_per_day INTEGER DEFAULT 1000
-            )
-        """)
-
-        # Create api_sessions table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS api_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                api_key TEXT NOT NULL,
-                user_id TEXT NOT NULL,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                request_data TEXT,
-                response_data TEXT
-            )
-        """)
-
-        conn.commit()
-
-# Initialize the database when this module is imported
-initialize_database()
+        pass  # Just create the empty database file

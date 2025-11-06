@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView,
     QMessageBox, QInputDialog, QDialog, QLabel,
-    QLineEdit, QTextEdit, QApplication
+    QLineEdit, QTextEdit, QApplication, QMenu
 )
 from PyQt6.QtCore import Qt
 from utils.logger import get_logger
@@ -47,37 +47,142 @@ class ApiKeyManagementTab(QWidget):
         layout.addWidget(self.api_keys_table)
         layout.addLayout(btn_layout)
 
-        # Style header in both light and dark modes
-        self.api_keys_table.horizontalHeader().setStyleSheet("""
-            QHeaderView::section {
-                background-color: #f0f0f0;
-                color: black;
-                padding: 5px;
-                border: 1px solid #ddd;
-            }
-        """)
+        # Apply adaptive styling based on theme
+        self.update_table_style()
         
-        # Style the row numbers (vertical header)
-        self.api_keys_table.verticalHeader().setStyleSheet("""
-            QHeaderView::section {
-                background-color: #f0f0f0;
-                color: black;
-                padding: 5px;
-                border: 1px solid #ddd;
-            }
-        """)
+        # Set up context menu
+        self.api_keys_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.api_keys_table.customContextMenuRequested.connect(self.show_context_menu)
+        
+    def update_table_style(self):
+        """Updates table styling based on current theme."""
+        is_dark = hasattr(self.app_instance.config, 'DARK_MODE') and self.app_instance.config.DARK_MODE
+        
+        if is_dark:
+            header_style = """
+                QHeaderView::section {
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    padding: 5px;
+                    border: 1px solid #3d3d3d;
+                }
+                QTableView {
+                    gridline-color: #3d3d3d;
+                    border: 1px solid #3d3d3d;
+                }
+            """
+        else:
+            header_style = """
+                QHeaderView::section {
+                    background-color: #f0f0f0;
+                    color: #000000;
+                    padding: 5px;
+                    border: 1px solid #ddd;
+                }
+                QTableView {
+                    gridline-color: #ddd;
+                    border: 1px solid #ddd;
+                }
+            """
+        
+        self.api_keys_table.horizontalHeader().setStyleSheet(header_style)
+        self.api_keys_table.verticalHeader().setStyleSheet(header_style)
+        
+    def show_context_menu(self, pos):
+        """Shows context menu for API key operations."""
+        selected_rows = self.api_keys_table.selectionModel().selectedRows()
+        if not selected_rows:
+            return
+            
+        menu = QMenu(self)
+        
+        # Add menu items
+        copy_user_id = menu.addAction("Copy User ID")
+        copy_api_key = menu.addAction("Copy API Key")
+        menu.addSeparator()
+        show_details = menu.addAction("Show Details")
+        menu.addSeparator()
+        modify_action = menu.addAction("Modify User ID")
+        delete_action = menu.addAction("Delete")
+        
+        # Get the global position
+        global_pos = self.api_keys_table.mapToGlobal(pos)
+        
+        # Show menu and get selected action
+        action = menu.exec(global_pos)
+        
+        if not action:
+            return
+            
+        # Handle the selected action
+        row = selected_rows[0].row()
+        user_id = self.api_keys_table.item(row, 0).text()
+        
+        if action == copy_user_id:
+            self.copy_to_clipboard(user_id)
+        elif action == copy_api_key:
+            # Get the full API key from the item's data
+            api_key = self.api_keys_table.item(row, 1).data(Qt.ItemDataRole.UserRole)
+            if api_key:
+                self.copy_to_clipboard(api_key)
+                QMessageBox.information(self, "Copied", "API Key has been copied to clipboard.")
+        elif action == show_details:
+            self.show_api_key_details(user_id)
+        elif action == modify_action:
+            self.modify_api_key()
+        elif action == delete_action:
+            self.delete_api_key()
+            
+    def show_api_key_details(self, user_id):
+        """Shows detailed information about the selected API key."""
+        keys = self.app_instance.api_key_manager.list_all_api_keys()
+        if user_id not in keys:
+            return
+            
+        key_data = keys[user_id]
+        api_key = key_data.get("api_key", "N/A")
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"API Key Details - {user_id}")
+        dialog.setMinimumWidth(500)
+        
+        layout = QVBoxLayout()
+        
+        # Create details layout
+        details = [
+            ("User ID:", user_id),
+            ("API Key:", api_key),
+            ("Key Hash:", key_data.get("key_hash", "N/A")),
+            ("Created:", key_data.get("created_at", "N/A")),
+            ("Expires:", key_data.get("expires_at", "N/A")),
+            ("Rate Limit (per minute):", str(key_data.get("rate_limit", {}).get("calls_per_minute", "N/A"))),
+            ("Rate Limit (per day):", str(key_data.get("rate_limit", {}).get("calls_per_day", "N/A")))
+        ]
+        
+        for label, value in details:
+            row_layout = QHBoxLayout()
+            label_widget = QLabel(label)
+            label_widget.setStyleSheet("font-weight: bold;")
+            value_widget = QLineEdit(value)
+            value_widget.setReadOnly(True)
+            row_layout.addWidget(label_widget)
+            row_layout.addWidget(value_widget)
+            layout.addLayout(row_layout)
+        
+        # Add close button
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(dialog.accept)
+        layout.addWidget(close_btn)
+        
+        dialog.setLayout(layout)
+        dialog.exec()
 
+        # Connect button signals
         self.generate_key_button.clicked.connect(self.generate_api_key)
         self.modify_key_button.clicked.connect(self.modify_api_key)
         self.delete_key_button.clicked.connect(self.delete_api_key)
         self.group_keys_button.clicked.connect(self.group_selected_keys)
         self.refresh_keys_button.clicked.connect(self.refresh_api_keys_tab)
-
-        # Enable multiple selection shortcuts
-        self.api_keys_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.api_keys_table.setSelectionMode(QTableWidget.SelectionMode.ExtendedSelection)
-
-        self.setLayout(layout)
 
     def refresh_api_keys_tab(self):
         try:
@@ -107,10 +212,17 @@ class ApiKeyManagementTab(QWidget):
                 
                 # Create table items
                 user_id_item = QTableWidgetItem(user_id)
-                api_key_item = QTableWidgetItem(data.get("api_key", ""))
+                # Get API key and create a masked version for display
+                api_key = data.get("api_key", "")
+                masked_key = f"{api_key[:8]}..." if api_key else "Not Available"
+                api_key_item = QTableWidgetItem(masked_key)
+                api_key_item.setData(Qt.ItemDataRole.UserRole, api_key)  # Store full key
+                
                 created_item = QTableWidgetItem(data.get("created_at"))
                 expires_item = QTableWidgetItem(data.get("expires_at"))
-                rate_limit_item = QTableWidgetItem(str(data.get("rate_limit")))
+                rate_limit = data.get("rate_limit", {})
+                rate_limit_text = f"Per min: {rate_limit.get('calls_per_minute', 'N/A')}, Per day: {rate_limit.get('calls_per_day', 'N/A')}"
+                rate_limit_item = QTableWidgetItem(rate_limit_text)
                 
                 # Set items as non-editable
                 for item in [user_id_item, api_key_item, created_item, expires_item, rate_limit_item]:
@@ -122,6 +234,9 @@ class ApiKeyManagementTab(QWidget):
                 self.api_keys_table.setItem(row_position, 2, created_item)
                 self.api_keys_table.setItem(row_position, 3, expires_item)
                 self.api_keys_table.setItem(row_position, 4, rate_limit_item)
+
+                # Set tooltip for API key column
+                api_key_item.setToolTip("Right-click for options to copy or view full key")
             logger.info(f"Successfully populated table with {len(keys)} API keys")
             
         except Exception as e:
@@ -327,3 +442,5 @@ class ApiKeyManagementTab(QWidget):
             QMessageBox.information(self, "Batch Modify Complete",
                                   f"Successfully modified {success_count} of {len(user_ids)} API keys.")
             self.refresh_api_keys_tab()
+
+

@@ -31,9 +31,10 @@ class Config:
     CUSTOM_STOPWORDS = {"a", "an", "the", "is", "are", "i", "you", "am"}
 
     # ==================== MODEL CONFIG ====================
-    MODELS_DIR = os.path.join(BASE_DIR, 'model')
-    MODEL_FILE_PATH = os.path.join(MODELS_DIR, 'svm', 'intent_classifier.pkl')
-    VECTORIZER_FILE_PATH = os.path.join(MODELS_DIR, 'svm', 'vectorizer.pkl')
+    MODELS_DIR = os.path.join(BASE_DIR, 'model', 'trained_models')
+    MODEL_TYPE = 'bert'  # 'svm' or 'bert'
+    MODEL_FILE_PATH = os.path.join(MODELS_DIR, 'bert', 'intent_classifier.pkl')
+    VECTORIZER_FILE_PATH = os.path.join(MODELS_DIR, 'bert', 'vectorizer.pkl')
     BERT_MODEL_PATH = "bert-base-uncased"
     
     # Model type can be 'svm' or 'bert'
@@ -45,8 +46,8 @@ class Config:
     
     # BERT-specific parameters
     BERT_BATCH_SIZE = 16
-    BERT_EPOCHS = 3
-    BERT_LEARNING_RATE = 2e-5
+    BERT_EPOCHS = 5
+    BERT_LEARNING_RATE = 1e-5
     
     # Context Handler
     CONTEXT_WINDOW_SIZE = 3
@@ -120,7 +121,13 @@ class Config:
 
     def __init__(self):
         self.load_from_env()  # Call first to allow overrides
-        # The rest of your existing config stays the same
+        
+        # Create necessary directories
+        os.makedirs(os.path.join(self.BASE_DIR, 'data'), exist_ok=True)
+        os.makedirs(self.INTENTS_DIR, exist_ok=True)
+        os.makedirs(os.path.join(self.MODELS_DIR, 'svm'), exist_ok=True)
+        os.makedirs(os.path.join(self.MODELS_DIR, 'bert'), exist_ok=True)
+        os.makedirs(self.LOG_DIR, exist_ok=True)
 
     @staticmethod
     def _get_bool_env(var, default):
