@@ -188,12 +188,12 @@ CREATE INDEX idx_responses_intent ON responses(intent_id);
 ### Common Queries
 ```sql
 -- Get active sessions for user
-SELECT * FROM sessions
+SELECT * FROM sessions 
 WHERE user_id = ? AND last_active > datetime('now', '-1 day');
 
 -- Get conversation history
-SELECT * FROM messages
-WHERE session_id = ?
+SELECT * FROM messages 
+WHERE session_id = ? 
 ORDER BY sent_at ASC;
 
 -- Find intent patterns

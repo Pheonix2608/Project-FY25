@@ -87,7 +87,7 @@ function handleError(error) {
     const errorDiv = document.getElementById('error-message');
     errorDiv.textContent = `Error: ${error.message}`;
     errorDiv.style.display = 'block';
-
+    
     // Log for debugging
     console.error('Detailed error:', error);
 }
@@ -156,7 +156,7 @@ npm test  # if using test framework
 server {
     listen 80;
     server_name chatbot.example.com;
-
+    
     location / {
         root /var/www/chatbot;
         index index.html;

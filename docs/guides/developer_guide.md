@@ -46,15 +46,15 @@ class Config:
     # Model settings
     MODEL_TYPE = "svm"  # or "bert"
     CONTEXT_WINDOW_SIZE = 5
-
+    
     # API settings
     API_HOST = "0.0.0.0"
     API_PORT = 8080
-
+    
     # Paths
     DATA_PATH = "data/intents/"
     MODEL_PATH = "model/"
-
+    
     # Logging
     LOG_LEVEL = "INFO"
 ```

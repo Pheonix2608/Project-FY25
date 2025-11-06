@@ -41,7 +41,7 @@ graph TD
 class ChatbotApp:
     """
     Central orchestrator managing all chatbot components.
-
+    
     Responsibilities:
     - Initialize and coordinate all components
     - Process user input through the pipeline
@@ -56,7 +56,7 @@ class ChatbotApp:
 class Config:
     """
     Configuration management with environment support.
-
+    
     Key Parameters:
     - MODEL_TYPE: 'svm' or 'bert'
     - LOG_LEVEL: Logging detail level
@@ -70,7 +70,7 @@ class Config:
 class TextPreprocessor:
     """
     Text preprocessing pipeline.
-
+    
     Operations:
     1. Tokenization (NLTK)
     2. Lowercasing
@@ -85,7 +85,7 @@ class TextPreprocessor:
 class IntentClassifier:
     """
     Intent classification model factory.
-
+    
     Features:
     - Dynamic model selection (SVM/BERT)
     - Model training and persistence
@@ -156,14 +156,14 @@ User Input -> Context Window -> Intent Classification -> Response Generation -> 
    def classify_intent(text):
        # 1. Preprocess text
        tokens = preprocess(text)
-
+       
        # 2. TF-IDF Vectorization
        vector = vectorizer.transform(tokens)
-
+       
        # 3. SVM Prediction
        intent = svm_model.predict(vector)
        confidence = svm_model.predict_proba(vector).max()
-
+       
        return intent, confidence
    ```
 
@@ -172,16 +172,16 @@ User Input -> Context Window -> Intent Classification -> Response Generation -> 
    def classify_intent(text):
        # 1. Tokenization
        tokens = tokenizer(text, padding=True, truncation=True)
-
+       
        # 2. BERT Encoding
        with torch.no_grad():
            outputs = model(**tokens)
-
+       
        # 3. Intent Classification
        logits = outputs.logits
        intent = labels[logits.argmax()]
        confidence = torch.softmax(logits, dim=1).max()
-
+       
        return intent, confidence
    ```
 
@@ -195,11 +195,11 @@ class ContextHandler:
             "text": user_input,
             "intent": intent
         })
-
+        
         # 2. Apply context rules
         if intent.context_set:
             self.current_context = intent.context_set
-
+            
         # 3. Trim context window
         if len(self.context) > self.window_size:
             self.context.pop(0)

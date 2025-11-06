@@ -10,16 +10,14 @@ import datetime
 from config import Config
 
 def get_logger(name):
-    """Creates and configures a logger instance.
-
-    This function sets up a logger with both console and file handlers.
-    The file handler rotates daily, keeping a history of logs.
+    """
+    Creates and returns a logger instance with a standardized format and daily file rotation.
 
     Args:
-        name (str): The name for the logger, typically the module's `__name__`.
+        name (str): The name of the logger, typically the module name (`__name__`).
 
     Returns:
-        logging.Logger: A configured logger instance.
+        logging.Logger: A configured logger object.
     """
     config = Config()
 

@@ -7,28 +7,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 def load_all_intents(intents_dir: str) -> Dict:
-    """Loads and merges all intent JSON files from a directory.
-
-    This function reads all `.json` files in the specified directory,
-    merging them into a single dictionary. It handles various JSON
-    formats and ensures a default intent is present.
-
+    """
+    Load and merge all JSON files from the intents directory.
+    
     Args:
-        intents_dir (str): The path to the directory containing intent files.
-
+        intents_dir (str): Path to the directory containing intent JSON files
+        
     Returns:
-        Dict: A dictionary containing a list of all loaded intents.
-            Returns a dictionary with an empty list if an error occurs.
+        dict: Merged intents data with all intents from all files
     """
     all_intents = {"intents": []}
-
+    
     try:
         # Ensure we load other.json last so its default intent is available
         json_files = [f for f in os.listdir(intents_dir) if f.endswith('.json')]
         if 'other.json' in json_files:
             json_files.remove('other.json')
             json_files.append('other.json')
-
+        
         for filename in json_files:
             filepath = os.path.join(intents_dir, filename)
             try:
@@ -53,10 +49,10 @@ def load_all_intents(intents_dir: str) -> Dict:
                 logger.error(f"Error decoding JSON from {filename}")
             except Exception as e:
                 logger.error(f"Error loading {filename}: {str(e)}")
-
+        
         # Ensure default intent exists
         default_intent = next((intent for intent in all_intents['intents'] if intent.get('tag') == 'default'), None)
-
+        
         if not default_intent:
             logger.warning("No default intent found; creating a minimal fallback.")
             default_intent = {
@@ -65,9 +61,9 @@ def load_all_intents(intents_dir: str) -> Dict:
                 "responses": ["I'm not sure how to respond to that."]
             }
             all_intents['intents'].append(default_intent)
-
+        
         return all_intents
-
+    
     except Exception as e:
         logger.error(f"Error loading intents: {str(e)}")
         return {"intents": []}

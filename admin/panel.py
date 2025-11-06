@@ -14,18 +14,7 @@ from admin.tabs.system_stats_tab import SystemStatsTab
 from admin.tabs.log_viewer_tab import LogViewerTab
 
 class AdminPanel(QWidget):
-    """The main Admin Panel GUI for the chatbot application.
-
-    This class serves as the main window for the admin panel, organizing
-    various management and testing functionalities into a tabbed interface.
-    """
     def apply_dark_mode(self, enabled):
-        """Applies or removes a simple dark mode stylesheet.
-
-        Args:
-            enabled (bool): If True, the dark mode stylesheet is applied.
-                If False, the default stylesheet is restored.
-        """
         if enabled:
             # Simple dark theme stylesheet
             self.setStyleSheet("""
@@ -39,13 +28,14 @@ class AdminPanel(QWidget):
             """)
         else:
             self.setStyleSheet("")
+    """Admin Panel GUI for the chatbot application."""
 
     def __init__(self, app):
-        """Initializes the AdminPanel GUI and builds the tabbed layout.
+        """
+        Initialize the GUI and build the tabbed layout.
 
         Args:
-            app (ChatbotApp): The main application instance, which provides
-                access to the chatbot's core functionalities and configuration.
+            app (ChatbotApp): The main application instance.
         """
         super().__init__()
         self.app_instance = app
@@ -72,26 +62,21 @@ class AdminPanel(QWidget):
         self.api_session_viewer_tab = ApiSessionViewerTab()
         self.settings_tab = SettingsTab(self.app_instance)
         self.system_stats_tab = SystemStatsTab()
-        self.log_viewer_tab = LogViewerTab(self.config.LOG_DIR)
+        self.log_viewer_tab = LogViewerTab(log_dir=self.config.LOG_DIR)
 
         self.tabs.addTab(self.chat_tester_tab, "Chat Tester")
         self.tabs.addTab(self.api_key_management_tab, "API Key Management")
         self.tabs.addTab(self.api_session_viewer_tab, "API Session Viewer")
-        self.tabs.addTab(self.settings_tab, "Settings")
         self.tabs.addTab(self.system_stats_tab, "System Stats")
         self.tabs.addTab(self.log_viewer_tab, "Log Viewer")
+        self.tabs.addTab(self.settings_tab, "Settings")
 
         self.setLayout(layout)
 
     def display_message(self, sender, message):
-        """Delegates displaying a message to the Chat Tester tab.
-
-        Args:
-            sender (str): The sender of the message (e.g., "User", "Bot").
-            message (str): The content of the message to display.
-        """
+        """Delegate method to display a message in the chat tester tab."""
         self.chat_tester_tab.display_message(sender, message)
 
     def clear_chat(self):
-        """Delegates clearing the chat display to the Chat Tester tab."""
+        """Delegate method to clear the chat in the chat tester tab."""
         self.chat_tester_tab.clear_chat()

@@ -6,18 +6,14 @@
 import os
 
 class Config:
-    """A centralized configuration class for the chatbot application.
-
-    This class holds all static and dynamic configuration settings, such as
-    file paths, model parameters, and feature toggles. It also includes
-    functionality to load settings from environment variables, allowing for
-    flexible deployment.
-    """
     # ==================== UI CONFIG ====================
     DARK_MODE = False
+    """
+    Holds all the configuration settings for the chatbot.
+    """
     # ==================== GENERAL CONFIG ====================
     PROJECT_NAME = "Intelligent Chatbot"
-    VERSION = "1.2.0"
+    VERSION = "1.7.0"
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
     # ==================== DATA CONFIG ====================
@@ -41,7 +37,11 @@ class Config:
     BERT_MODEL_PATH = "bert-base-uncased"
     
     # Model type can be 'svm' or 'bert'
-    MODEL_TYPE = 'svm'
+    MODEL_TYPE = 'bert'
+    
+    # Confidence threshold for intent classification
+    # Responses below this threshold will trigger fallback behavior
+    CONFIDENCE_THRESHOLD = 0.5  # 50% confidence required
     
     # BERT-specific parameters
     BERT_BATCH_SIZE = 16
@@ -50,9 +50,6 @@ class Config:
     
     # Context Handler
     CONTEXT_WINDOW_SIZE = 3
-
-    # Confidence threshold for intent classification
-    CONFIDENCE_THRESHOLD = 0.6
     
     # Enable generative model response hook
     ENABLE_GENERATIVE_RESPONSE = False
@@ -64,8 +61,8 @@ class Config:
     GOOGLE_CACHE_DURATION = 3600
 
     # ==================== GUI CONFIG ====================
-    GUI_WIDTH = 800
-    GUI_HEIGHT = 600
+    GUI_WIDTH = 400
+    GUI_HEIGHT = 400
     GUI_title = "Intelligent Chatbot"
     # GUI Themes
 
@@ -101,18 +98,13 @@ class Config:
     LOG_LEVEL = "INFO" # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
     LOG_ROTATION_SIZE_MB = 10
 
-    # Add to Config class:
+        # Add to Config class:
 
     def load_from_env(self):
-        """Loads configuration settings from environment variables.
-
-        This method overrides default configuration values with values found
-        in environment variables, allowing for flexible configuration without
-        modifying the code.
-        """
         self.MODEL_TYPE = os.getenv("MODEL_TYPE", self.MODEL_TYPE)
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", self.LOG_LEVEL)
         self.BERT_MODEL_PATH = os.getenv("BERT_MODEL_PATH", self.BERT_MODEL_PATH)
+        self.CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", self.CONFIDENCE_THRESHOLD))
         self.BERT_BATCH_SIZE = int(os.getenv("BERT_BATCH_SIZE", self.BERT_BATCH_SIZE))
         self.BERT_EPOCHS = int(os.getenv("BERT_EPOCHS", self.BERT_EPOCHS))
         self.BERT_LEARNING_RATE = float(os.getenv("BERT_LEARNING_RATE", self.BERT_LEARNING_RATE))
@@ -127,26 +119,11 @@ class Config:
         self.GOOGLE_CACHE_DURATION = int(os.getenv("GOOGLE_CACHE_DURATION", self.GOOGLE_CACHE_DURATION))
 
     def __init__(self):
-        """Initializes the Config object.
-
-        This calls `load_from_env` to ensure that environment variables
-        are applied when a `Config` instance is created.
-        """
         self.load_from_env()  # Call first to allow overrides
         # The rest of your existing config stays the same
 
     @staticmethod
     def _get_bool_env(var, default):
-        """Gets a boolean value from an environment variable.
-
-        Args:
-            var (str): The name of the environment variable.
-            default: The default value to return if the variable is not set.
-
-        Returns:
-            bool: The boolean representation of the environment variable's
-                value, or the default value.
-        """
         val = os.getenv(var)
         if val is None:
             return default

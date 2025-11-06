@@ -22,8 +22,6 @@ logs/
 # Data and models
 *.pkl
 *.h5
-*.db
-*.db-journal
 
 
 # Models
@@ -45,3 +43,4 @@ config.pyc
 
 # Ignore test outputs
 *.out
+

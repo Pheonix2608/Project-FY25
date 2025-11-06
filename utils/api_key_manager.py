@@ -5,60 +5,46 @@ from passlib.context import CryptContext
 from .database import get_db_connection
 
 class APIKeyManager:
-    """Manages API keys, including creation, verification, and rate limiting.
-
-    This class handles the lifecycle of API keys, storing them securely
-    and providing methods to interact with them.
-    """
     def __init__(self):
-        """Initializes the APIKeyManager.
-
-        Sets up the password hashing context for securing API keys.
-        """
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def generate_api_key(self, user_id: str, expiration_days: int = 30) -> str:
-        """Generates a new API key for a user.
-
-        Args:
-            user_id (str): The unique identifier for the user.
-            expiration_days (int): The number of days until the key expires.
-
-        Returns:
-            str: The generated API key.
-
-        Raises:
-            ValueError: If the user_id already exists.
-        """
-        api_key = secrets.token_urlsafe(32)
-        hashed_key = self.pwd_context.hash(api_key)
-
-        expires_at = datetime.now() + timedelta(days=expiration_days)
-
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
+        try:
+            if not user_id or not isinstance(user_id, str):
+                raise ValueError("User ID must be a non-empty string")
+                
+            api_key = secrets.token_urlsafe(32)
             try:
-                cursor.execute(
-                    "INSERT INTO api_keys (key_hash, user_id, expires_at) VALUES (?, ?, ?)",
-                    (hashed_key, user_id, expires_at)
-                )
-                conn.commit()
-            except sqlite3.IntegrityError:
-                # This will be raised if the user_id is not unique
-                raise ValueError(f"User ID '{user_id}' already exists.")
-
-        return api_key
+                hashed_key = self.pwd_context.hash(api_key)
+            except Exception as hash_error:
+                raise RuntimeError(f"Failed to hash API key: {str(hash_error)}")
+            
+            expires_at = datetime.now() + timedelta(days=expiration_days)
+            
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute(
+                        "INSERT INTO api_keys (key_hash, user_id, expires_at) VALUES (?, ?, ?)",
+                        (hashed_key, user_id, expires_at)
+                    )
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    raise ValueError(f"User ID '{user_id}' already exists.")
+                except sqlite3.OperationalError as db_error:
+                    raise RuntimeError(f"Database error: {str(db_error)}")
+                except Exception as e:
+                    raise RuntimeError(f"Unexpected database error: {str(e)}")
+            
+            return api_key
+        except Exception as e:
+            # Log the full error with stack trace
+            from utils.logger import get_logger
+            logger = get_logger(__name__)
+            logger.exception("Failed to generate API key")
+            raise
 
     def verify_api_key(self, api_key: str) -> str | None:
-        """Verifies an API key.
-
-        Args:
-            api_key (str): The API key to verify.
-
-        Returns:
-            str | None: The user_id associated with the key if valid and not
-                expired, otherwise None.
-        """
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT key_hash, user_id, expires_at FROM api_keys")
@@ -72,15 +58,6 @@ class APIKeyManager:
         return None
 
     def get_rate_limits(self, user_id: str) -> dict | None:
-        """Retrieves the rate limits for a given user.
-
-        Args:
-            user_id (str): The user's unique identifier.
-
-        Returns:
-            dict | None: A dictionary with rate limit information or None if
-                the user is not found.
-        """
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT rate_limit_per_minute, rate_limit_per_day FROM api_keys WHERE user_id = ?", (user_id,))
@@ -90,13 +67,6 @@ class APIKeyManager:
         return None
 
     def update_rate_limits(self, user_id: str, calls_per_minute: int, calls_per_day: int):
-        """Updates the rate limits for a user.
-
-        Args:
-            user_id (str): The user's unique identifier.
-            calls_per_minute (int): The new rate limit for calls per minute.
-            calls_per_day (int): The new rate limit for calls per day.
-        """
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -106,12 +76,6 @@ class APIKeyManager:
             conn.commit()
 
     def list_all_api_keys(self) -> dict:
-        """Lists all API keys and their details.
-
-        Returns:
-            dict: A dictionary where keys are user_ids and values are
-                details about the API key.
-        """
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT user_id, created_at, expires_at, rate_limit_per_minute, rate_limit_per_day FROM api_keys")
@@ -130,14 +94,6 @@ class APIKeyManager:
             return keys_to_return
 
     def delete_api_key(self, user_id: str) -> bool:
-        """Deletes an API key for a specific user.
-
-        Args:
-            user_id (str): The user's unique identifier.
-
-        Returns:
-            bool: True if a key was deleted, False otherwise.
-        """
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM api_keys WHERE user_id = ?", (user_id,))
@@ -145,16 +101,6 @@ class APIKeyManager:
             return cursor.rowcount > 0
 
     def modify_api_key_user(self, old_user_id: str, new_user_id: str) -> bool:
-        """Changes the user_id associated with an API key.
-
-        Args:
-            old_user_id (str): The current user_id.
-            new_user_id (str): The new user_id to associate with the key.
-
-        Returns:
-            bool: True if the update was successful, False otherwise (e.g.,
-                if the new_user_id already exists).
-        """
         with get_db_connection() as conn:
             cursor = conn.cursor()
             try:

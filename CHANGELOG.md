@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API deployment with FastAPI
 - CI/CD integration via GitHub Actions
 
+### Documentation & Workflow
+- Added `.github/copilot-instructions.md` for AI agent guidance
+- Clarified Admin Panel launch workflow in `ReadME.md`
+
 ---
 
 ## [1.4.0] - 2025-09-16

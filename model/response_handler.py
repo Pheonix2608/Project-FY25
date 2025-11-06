@@ -12,18 +12,16 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 class ResponseHandler:
-    """Handles the generation of chatbot responses based on intents.
-
-    This class selects an appropriate response for a given intent,
-    manages fallbacks (like Google Search), and can incorporate
-    personalization based on extracted entities.
+    """
+    A class to handle the generation of chatbot responses based on intents.
     """
     def __init__(self, data, config):
-        """Initializes the ResponseHandler.
-
+        """
+        Initializes the response handler with the data.
+        
         Args:
-            data (dict): The loaded intent data, typically from JSON files.
-            config (Config): The application's configuration object.
+            data (dict): The data loaded from `intents.json`.
+            config (Config): The configuration object.
         """
         self.config = config
         self.intents = data['intents']
@@ -37,42 +35,47 @@ class ResponseHandler:
         }
         logger.info("Response handler initialized with rules-based responses.")
 
-    def get_response(self, intent_tag, confidence, context, entities=None):
-        """Retrieves a response for a given intent.
-
-        This method selects a response based on the intent tag. It can
-        personalize responses using NER entities and trigger a Google
-        Search fallback if the intent is unknown or has no defined response.
-
-        Args:
-            intent_tag (str): The predicted intent tag.
-            confidence (float): The confidence score of the prediction.
-            context (list): The history of the conversation.
-            entities (list, optional): Extracted named entities. Defaults to None.
-
-        Returns:
-            str: A response string.
+    def get_response(self, intent_tag, confidence, context):
         """
-        logger.info(f"Getting response for intent '{intent_tag}' with confidence {confidence:.2f}, context: {context}, and entities: {entities}")
+        Retrieves a random response for a given intent tag, considering confidence threshold.
+        
+        Args:
+            intent_tag (str): The predicted intent tag from the classifier.
+            confidence (float): The confidence score of the prediction.
+            context (list): A list of recent queries and responses.
+            
+        Returns:
+            str: A randomly selected response string.
+        """
+        logger.info(f"Getting response for intent '{intent_tag}' with confidence {confidence:.2f} and context: {context}")
+        
+        # Check confidence threshold
+        if confidence < self.config.CONFIDENCE_THRESHOLD:
+            logger.info(f"Confidence {confidence:.2f} below threshold {self.config.CONFIDENCE_THRESHOLD}")
+            # Log the low confidence query for model improvement
+            query = context[-1]['text'] if context else "unknown_query"
+            self._log_unmatched_query(f"Low confidence ({confidence:.2f}): {query}")
+            # Use Google fallback if enabled, otherwise use default response
+            if self.config.ENABLE_GOOGLE_FALLBACK:
+                return self.google_fallback(context)
+            return random.choice(self.default_responses)
         
         # ----- Hooks for advanced generation (future) -----
         if self.config.ENABLE_GENERATIVE_RESPONSE:
             # This is a placeholder for a generative model response.
+            # A real implementation would require an asynchronous call to an API or a local model.
+            # Example using a placeholder function:
+            # return self._generate_llm_response(intent_tag, context)
             pass
         
-        # Personalize response if a person's name is detected
-        if entities:
-            for entity in entities:
-                if entity['label'] == 'PERSON':
-                    person_name = entity['text']
-                    # Example of using the name in a greeting
-                    if intent_tag == 'greeting':
-                         return f"Hello {person_name}! How can I help you today?"
-
         if intent_tag in ("unknown", "no_match"):
-            logger.warning(f"Unknown intent detected. Returning default response.")
+            logger.warning(f"Unknown intent detected. Logging query for retraining.")
             self._log_unmatched_query(context[-1]['text'] if context else "unknown_query")
-            return random.choice(self.default_responses)
+            if self.config.ENABLE_GOOGLE_FALLBACK:
+                logger.info("Unknown intent, falling back to Google Search.")
+                return self.google_fallback(context)
+            else:
+                return random.choice(self.default_responses)
         
         # Handle explicit default tag without warning
         if intent_tag == 'default':
@@ -99,21 +102,13 @@ class ResponseHandler:
         })
         return random.choice(self.default_responses)
 
-    def google_fallback(self, query: str):
-        """Performs a Google search as a fallback action.
-
-        Args:
-            query (str): The user query to search for.
-
-        Returns:
-            str: A formatted string of search results or a default message
-                if the search fails.
-        """
+    def google_fallback(self, context):
+        """Performs a Google search and returns the results, with a confirmation message."""
         logger.info({
             'event': 'response_source',
             'source': 'google_fallback'
         })
-        user_query = query
+        user_query = context[-1]['text'] if context else ""
         import asyncio
         from utils.web_search import query_google
         loop = asyncio.get_event_loop()
@@ -136,18 +131,6 @@ class ResponseHandler:
             return random.choice(self.default_responses)
 
     async def _get_google_results_with_retry(self, query, retries=2):
-        """Attempts to perform a Google search with retries.
-
-        Args:
-            query (str): The search query.
-            retries (int): The number of times to retry on failure.
-
-        Returns:
-            list: A list of search result strings.
-
-        Raises:
-            Exception: If all search attempts fail.
-        """
         for attempt in range(retries + 1):
             try:
                 from utils.web_search import query_google
@@ -159,14 +142,8 @@ class ResponseHandler:
         raise Exception("All Google search attempts failed.")
 
     def _merge_google_results(self, query, results):
-        """Merges Google search results into a formatted string.
-
-        Args:
-            query (str): The original search query.
-            results (list): A list of search result strings.
-
-        Returns:
-            str: A formatted string containing the search results.
+        """
+        Merge Google results into a structured response string.
         """
         if not results:
             return "Sorry, I couldn't find an answer online."
@@ -175,22 +152,19 @@ class ResponseHandler:
         return merged
 
     def _log_unmatched_query(self, query):
-        """Logs a user query that did not match any known intent.
-
+        """
+        Logs a user query that didn't match a known intent.
+        
         Args:
             query (str): The user's input string.
         """
         logger.warning(f"UNMATCHED_QUERY: '{query}'")
 
     def _generate_llm_response(self, intent, context):
-        """A placeholder for future LLM-based response generation.
-
-        This method is intended to be a hook for integrating a large language
-        model for more dynamic and context-aware responses.
-
-        Args:
-            intent (str): The detected intent.
-            context (list): The conversation history.
+        """
+        Placeholder for a future LLM-based response generation.
+        This would typically be an asynchronous call in a separate thread
+        to prevent the GUI from freezing.
         """
         # Example: call to an LLM API or a local model
         # prompt = f"The user's intent is '{intent}'. Conversation history: {context}. Respond appropriately."

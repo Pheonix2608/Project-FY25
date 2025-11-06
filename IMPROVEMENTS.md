@@ -24,6 +24,11 @@
 
 ---
 
+
+## Documentation & AI Agent Guidance
+- Added `.github/copilot-instructions.md` for project-specific AI agent instructions
+- Clarified Admin Panel launch workflow in `ReadME.md`
+
 ## Issues Found and Fixed
 
 ### 1. Critical Bugs Fixed

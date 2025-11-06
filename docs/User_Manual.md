@@ -167,7 +167,7 @@ python main.py
 #### Chat Endpoint
 - **URL**: `/chat`
 - **Method**: POST
-- **Headers**:
+- **Headers**: 
   - `Content-Type: application/json`
   - `X-API-Key: <your-api-key>`
 - **Body**:

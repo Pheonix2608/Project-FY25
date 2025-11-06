@@ -14,17 +14,7 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 class BertIntentClassifier:
-    """An intent classifier using a pre-trained BERT model.
-
-    This class handles training, loading, and predicting intents from text
-    using a BERT model from the Hugging Face transformers library.
-    """
     def __init__(self, config):
-        """Initializes the BertIntentClassifier.
-
-        Args:
-            config (Config): The application's configuration object.
-        """
         self.config = config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = BertTokenizer.from_pretrained(config.BERT_MODEL_PATH)
@@ -34,13 +24,6 @@ class BertIntentClassifier:
         logger.info(f"BERT classifier initialized on device: {self.device}")
 
     def train_model(self, data, preprocessor=None):
-        """Trains the BERT model on the provided intent data.
-
-        Args:
-            data (dict): The intent data, containing patterns and tags.
-            preprocessor: This argument is not used in the BERT implementation
-                but is kept for compatibility.
-        """
         patterns, labels = [], []
         for intent in data['intents']:
             for pattern in intent['patterns']:
@@ -97,7 +80,6 @@ class BertIntentClassifier:
             pickle.dump(self.label_map, f)
 
     def load_model(self):
-        """Loads a trained BERT model and its associated label map from disk."""
         with open(self.config.DATA_PATH, 'r', encoding='utf-8') as f:
             data = json.load(f)
             self.intents = sorted(intent['tag'] for intent in data['intents'])
@@ -110,14 +92,6 @@ class BertIntentClassifier:
         self.model.eval()
 
     def predict_intent(self, preprocessed_tokens):
-        """Predicts the intent of a preprocessed text.
-
-        Args:
-            preprocessed_tokens (list): A list of tokens from the preprocessor.
-
-        Returns:
-            str: The predicted intent tag.
-        """
         text = " ".join(preprocessed_tokens)
         inputs = self.tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=64)
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
@@ -127,35 +101,15 @@ class BertIntentClassifier:
         return self.intents[prediction]
 
 class IntentDataset(Dataset):
-    """A PyTorch Dataset for handling intent classification data."""
     def __init__(self, texts, labels, tokenizer, label_map):
-        """Initializes the IntentDataset.
-
-        Args:
-            texts (list): A list of text patterns.
-            labels (list): A list of corresponding intent labels.
-            tokenizer: The BERT tokenizer instance.
-            label_map (dict): A mapping from string labels to integer indices.
-        """
         self.texts = texts
         self.labels = [label_map[label] for label in labels]
         self.tokenizer = tokenizer
 
     def __len__(self):
-        """Returns the total number of samples in the dataset."""
         return len(self.texts)
 
     def __getitem__(self, idx):
-        """
-        Retrieves a sample from the dataset at the given index.
-
-        Args:
-            idx (int): The index of the sample to retrieve.
-
-        Returns:
-            dict: A dictionary containing the input_ids, attention_mask,
-                and labels for the sample.
-        """
         encoding = self.tokenizer(
             self.texts[idx], truncation=True, padding='max_length', max_length=64, return_tensors='pt'
         )
@@ -164,3 +118,4 @@ class IntentDataset(Dataset):
             'attention_mask': encoding['attention_mask'].squeeze(),
             'labels': torch.tensor(self.labels[idx], dtype=torch.long)
         }
+

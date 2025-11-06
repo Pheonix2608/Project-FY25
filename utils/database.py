@@ -6,25 +6,13 @@ DB_FILE = os.path.join('data', 'chatbot.db')
 os.makedirs(os.path.dirname(DB_FILE), exist_ok=True)
 
 def get_db_connection():
-    """Establishes a connection to the SQLite database.
-
-    This function connects to the database specified by `DB_FILE` and
-    configures the connection to return rows as dictionary-like objects.
-
-    Returns:
-        sqlite3.Connection: A connection object to the database.
-    """
+    """Establishes a connection to the SQLite database."""
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
 
 def initialize_database():
-    """Initializes the database and creates tables if they don't exist.
-
-    This function sets up the necessary tables (`api_keys`, `api_sessions`)
-    for the application to function correctly. It is called automatically
-    when this module is imported.
-    """
+    """Initializes the database and creates tables if they don't exist."""
     with get_db_connection() as conn:
         cursor = conn.cursor()
 

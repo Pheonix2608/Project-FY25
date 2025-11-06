@@ -11,8 +11,8 @@ import torch
 from datetime import datetime
 from PyQt6.QtWidgets import QApplication
 import threading
-import uvicorn
-from api.server import app as fastapi_app, set_chatbot_app
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # Import project modules
 from config import Config
@@ -22,23 +22,16 @@ from utils.data_loader import load_all_intents
 from model.intent_classifier import IntentClassifier
 from model.response_handler import ResponseHandler
 from model.context_handler import ContextHandler
-from model.ner_extractor import NERExtractor
 from admin.panel import AdminPanel
 from utils.api_key_manager import APIKeyManager
 
 class ChatbotApp:
-    """The main application class for the chatbot.
-
-    This class orchestrates the entire application, including initializing
-    the configuration, models, GUI, and API server. It manages the core
-    logic for processing user input and generating responses.
+    """
+    Main application class that orchestrates the chatbot's functionality.
     """
     def __init__(self):
-        """Initializes the chatbot application.
-
-        This method sets up all necessary components, including the logger,
-        data preprocessor, model classifiers, and handlers. It also loads
-        the trained model or initiates training if a model is not found.
+        """
+        Initializes the chatbot components and the GUI.
         """
         self.config = Config()
         
@@ -54,19 +47,15 @@ class ChatbotApp:
         # Initialize Data and Preprocessing
         self.data = self._load_data(self.config.DATA_PATH)
         self.preprocessor = TextPreprocessor(self.config)
-
-        # Session management
-        self.user_sessions = {}
+        self.context_handler = ContextHandler(self.config.CONTEXT_WINDOW_SIZE)
 
         # Initialize Model Components
         self.intent_classifier = IntentClassifier(self.config)
         self.response_handler = ResponseHandler(self.data, self.config)
-        self.ner_extractor = NERExtractor()
         self.api_key_manager = APIKeyManager()
-
-        # Set the chatbot app instance for the FastAPI server
-        set_chatbot_app(self)
-
+        self._httpd = None
+        self._api_thread = None
+        
         # Database is initialized in the main block
 
         # Load or train the model
@@ -82,16 +71,11 @@ class ChatbotApp:
             self.retrain_model(background=True)
 
         # Initialize GUI
-        # self.app = QApplication(sys.argv)
-        # self.gui = AdminPanel(self)
-        # self.gui.setWindowTitle(f"{self.config.PROJECT_NAME} v{self.config.VERSION} - Admin Panel")
-        
-        # self.gui.show()
+        self.app = QApplication(sys.argv)
+        self.gui = AdminPanel(self)
+        self.gui.setWindowTitle(f"{self.config.PROJECT_NAME} v{self.config.VERSION} - Admin Panel")
+        self.gui.show()
 
-        # The API server is started in a background thread.
-
-        # The API server is started in a background thread.
-        
         logger.info("Chatbot Application initialized and ready.")
 
         # Start background API server
@@ -101,33 +85,15 @@ class ChatbotApp:
         except Exception as e:
             logger.error(f"Failed to start API server: {e}")
 
-    def get_or_create_session(self, user_id: str):
-        """Retrieves an existing session for a user or creates a new one.
-
-        Args:
-            user_id (str): The unique identifier for the user.
-
-        Returns:
-            dict: The user's session dictionary.
-        """
-        if user_id not in self.user_sessions:
-            self.user_sessions[user_id] = {
-                "context_handler": ContextHandler(self.config.CONTEXT_WINDOW_SIZE),
-                "google_search_confirmation_pending": False,
-                "session_google_search_preference": None,
-                "last_unknown_query": None,
-            }
-            logger.info(f"Created new session for user_id: {user_id}")
-        return self.user_sessions[user_id]
-
     def _load_data(self, file_path):
-        """Loads intent data from the intents directory.
-
+        """
+        Loads the intents and responses data from the intents directory.
+        
         Args:
-            file_path (str): A deprecated argument kept for compatibility.
-
+            file_path (str): Deprecated. Kept for compatibility.
+            
         Returns:
-            dict: A dictionary containing the loaded intent data.
+            dict: The loaded data.
         """
         try:
             intents_dir = getattr(self.config, 'INTENTS_DIR', None)
@@ -143,93 +109,36 @@ class ChatbotApp:
             logger.error(f"Error decoding JSON intents: {e}")
             return {"intents": []}
             
-    def process_input(self, user_id: str, user_input: str):
-        """Handles user input, processes it, and generates a response.
-
-        This is the core logic function that takes a user's message,
-        classifies the intent, and returns a complete response dictionary.
-
-        Args:
-            user_id (str): The unique identifier for the user.
-            user_input (str): The raw text input from the user.
-
-        Returns:
-            dict: A dictionary containing the response, intent, confidence,
-                and extracted entities.
+    def process_input(self, user_input):
         """
-        session = self.get_or_create_session(user_id)
-        context_handler = session["context_handler"]
-
-        # Extract entities from the user input
-        entities = self.ner_extractor.extract_entities(user_input)
-
+        Handles user input, processes it, and generates a response.
+        
+        Args:
+            user_input (str): The raw text input from the user.
+        
+        Returns:
+            dict: A dictionary containing the response and other metadata.
+        """
         if not user_input.strip():
-            return {"response": "Please type something to start our conversation.", "intent": "none", "confidence": 1.0, "entities": entities}
+            return {"response": "Please type something to start our conversation.", "intent": "none", "confidence": 1.0}
 
-        # Handle Google Search confirmation flow
-        if session["google_search_confirmation_pending"]:
-            if user_input.lower() in ['yes', 'y']:
-                session["session_google_search_preference"] = True
-                session["google_search_confirmation_pending"] = False
-                query = session["last_unknown_query"]
-                session["last_unknown_query"] = None
-
-                response_text = self.response_handler.google_fallback(query)
-
-                context_handler.add_user_query(query)
-                context_handler.add_bot_response(response_text)
-
-                return {"response": response_text, "intent": "google_search", "confidence": 1.0, "entities": entities}
-            elif user_input.lower() in ['no', 'n']:
-                session["session_google_search_preference"] = False
-                session["google_search_confirmation_pending"] = False
-                session["last_unknown_query"] = None
-                response = "Okay, I won't search. How else can I help you?"
-                context_handler.add_user_query(user_input)
-                context_handler.add_bot_response(response)
-                return {"response": response, "intent": "default", "confidence": 1.0, "entities": entities}
-            else:
-                response = "Please answer with 'yes' or 'no'. Would you like me to search Google for an answer?"
-                return {"response": response, "intent": "unknown_google_confirm", "confidence": 1.0, "entities": entities}
-
-        context_handler.add_user_query(user_input)
+        self.context_handler.add_user_query(user_input)
         preprocessed_text = self.preprocessor.preprocess(user_input)
-
         try:
             predicted_intent, confidence = self.intent_classifier.predict_intent(preprocessed_text)
-            if confidence < self.config.CONFIDENCE_THRESHOLD:
-                logger.info(f"Confidence {confidence:.2f} is below threshold {self.config.CONFIDENCE_THRESHOLD}. Intent classified as 'unknown'.")
-                predicted_intent = "unknown"
         except Exception as e:
             logger.error(f"Prediction error: {e}")
-            return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0, "entities": entities}
+            return {"response": "Sorry, I'm having trouble understanding right now.", "intent": "error", "confidence": 0.0}
 
-        if predicted_intent == "unknown":
-            if session["session_google_search_preference"] is True:
-                response = self.response_handler.google_fallback(user_input)
-            elif session["session_google_search_preference"] is False:
-                response = self.response_handler.get_response("default", 1.0, context_handler.get_context(), entities=entities)
-            else:
-                session["google_search_confirmation_pending"] = True
-                session["last_unknown_query"] = user_input
-                response = "I'm not sure how to answer that. Would you like me to search Google for an answer? (yes/no)"
-                return {"response": response, "intent": "unknown_google_confirm", "confidence": confidence, "entities": entities}
-        else:
-            response = self.response_handler.get_response(predicted_intent, confidence, context_handler.get_context(), entities=entities)
+        response = self.response_handler.get_response(predicted_intent, confidence, self.context_handler.get_context())
+        self.context_handler.add_bot_response(response)
 
-        context_handler.add_bot_response(response)
-
-        return {"response": response, "intent": predicted_intent, "confidence": confidence, "entities": entities}
+        return {"response": response, "intent": predicted_intent, "confidence": confidence}
 
     # ==================== API KEYS ====================
     def generate_api_key(self, user_id: str = "default_user") -> str:
-        """Generates an API key for a user.
-
-        Args:
-            user_id (str): The ID of the user for whom to generate the key.
-
-        Returns:
-            str: The newly generated API key, or an empty string on failure.
+        """
+        Generates an API key for a given user and returns the plaintext key once.
         """
         try:
             api_key = self.api_key_manager.generate_api_key(user_id)
@@ -242,35 +151,108 @@ class ChatbotApp:
 
     # ==================== HTTP API ====================
     def start_api_server(self):
-        """Starts the FastAPI server in a background thread."""
-        config = uvicorn.Config(
-            fastapi_app,
-            host=getattr(self.config, 'API_HOST', '0.0.0.0'),
-            port=getattr(self.config, 'API_PORT', 8080),
-            log_level="info",
-            timeout_keep_alive=5
-        )
-        self.server = uvicorn.Server(config)
-        self._api_thread = threading.Thread(target=self.server.run, daemon=False)
+        host = getattr(self.config, 'API_HOST', '0.0.0.0')
+        port = getattr(self.config, 'API_PORT', 8080)
+
+        app_ref = self
+
+        class ChatRequestHandler(BaseHTTPRequestHandler):
+            def _send_json(self, code, payload):
+                try:
+                    body = json.dumps(payload).encode('utf-8')
+                except Exception:
+                    body = b"{}"
+                self.send_response(code)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Content-Length', str(len(body)))
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-API-Key')
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_GET(self):
+                if self.path == '/':
+                    return self._send_json(200, {
+                        "status": "ok",
+                        "message": "Chatbot API running",
+                        "endpoints": [
+                            {"path": "/chat", "method": "POST", "headers": ["X-API-Key"], "body": {"message": "string"}}
+                        ]
+                    })
+                if self.path == '/chat':
+                    return self._send_json(405, {"error": "Method Not Allowed", "use": "POST /chat"})
+                return self._send_json(404, {"error": "Not Found"})
+
+            def do_OPTIONS(self):
+                self.send_response(204)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+                self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-API-Key')
+                self.end_headers()
+
+            def do_POST(self):
+                try:
+                    if self.path != '/chat':
+                        return self._send_json(404, {"error": "Not Found"})
+
+                    content_length = int(self.headers.get('Content-Length', '0'))
+                    raw = self.rfile.read(content_length) if content_length > 0 else b"{}"
+                    try:
+                        payload = json.loads(raw.decode('utf-8'))
+                    except Exception:
+                        return self._send_json(400, {"error": "Invalid JSON"})
+
+                    api_key = self.headers.get('X-API-Key') or payload.get('api_key')
+                    message = payload.get('message', '')
+
+                    if not api_key:
+                        return self._send_json(401, {"error": "Missing API key"})
+                    if not message:
+                        return self._send_json(400, {"error": "Missing message"})
+
+                    user_id = app_ref.api_key_manager.verify_api_key(api_key)
+                    if not user_id:
+                        return self._send_json(403, {"error": "Invalid or expired API key"})
+
+                    # Process input using the app's pipeline
+                    response_data = app_ref.process_input(message)
+
+                    # Log the API session
+                    app_ref.log_api_session(user_id, api_key, payload, response_data)
+
+                    return self._send_json(200, {
+                        "user_id": user_id,
+                        "response": response_data.get("response"),
+                        "intent": response_data.get("intent"),
+                        "confidence": response_data.get("confidence")
+                    })
+                except Exception as e:
+                    logger.error(f"API error: {e}")
+                    return self._send_json(500, {"error": "Internal Server Error"})
+
+        # Create server bound to host:port
+        self._httpd = HTTPServer((host, port), ChatRequestHandler)
+
+        def serve():
+            try:
+                self._httpd.serve_forever()
+            except Exception as e:
+                logger.error(f"HTTP server stopped: {e}")
+
+        self._api_thread = threading.Thread(target=serve, daemon=True)
         self._api_thread.start()
 
     def stop_api_server(self):
-        """Stops the running FastAPI server gracefully."""
-        if hasattr(self, 'server'):
-            self.server.should_exit = True
-            if hasattr(self, '_api_thread'):
-                self._api_thread.join(timeout=6)
-                logger.info("API server thread joined.")
+        try:
+            if self._httpd:
+                self._httpd.shutdown()
+                self._httpd.server_close()
+                self._httpd = None
+        except Exception:
+            pass
 
     def log_api_session(self, user_id, api_key, request_data, response_data):
-        """Logs an API interaction to the database.
-
-        Args:
-            user_id (str): The ID of the user making the request.
-            api_key (str): The API key used for the request.
-            request_data (dict): The data sent in the request body.
-            response_data (dict): The data returned in the response.
-        """
+        """Logs an API session to the database."""
         try:
             from utils.database import get_db_connection
             with get_db_connection() as conn:
@@ -292,13 +274,8 @@ class ChatbotApp:
             logger.error(f"Failed to log API session to database: {e}", exc_info=True)
 
     def retrain_model(self, background=False):
-        """Retrains the intent classification model.
-
-        This can be run in the foreground (blocking) or in a background
-        thread to avoid freezing the application.
-
-        Args:
-            background (bool): If True, retraining runs in a background thread.
+        """
+        Retrains the intent classification model. If background=True, runs in a separate thread and hot-swaps model on completion.
         """
         def _retrain():
             logger.info("[Retrain] Background retraining started...")
@@ -333,30 +310,17 @@ class ChatbotApp:
 
 
     def get_sessions_dir(self):
-        """Gets the directory where chat sessions are stored.
-
-        Returns:
-            str: The absolute path to the sessions directory.
-        """
         sessions_dir = os.path.join(self.config.BASE_DIR, 'data', 'sessions')
         os.makedirs(sessions_dir, exist_ok=True)
         return sessions_dir
 
     def list_sessions(self):
-        """Lists all saved chat session files.
-
-        Returns:
-            list: A sorted list of session filenames.
-        """
         sessions_dir = self.get_sessions_dir()
         return sorted([f for f in os.listdir(sessions_dir) if f.endswith('.json')])
 
     def save_history(self, session_name=None):
-        """Saves the current conversation history to a session file.
-
-        Args:
-            session_name (str, optional): The name for the session file.
-                If None, a timestamped name is generated.
+        """
+        Saves the current conversation history to a new session file (timestamped if not provided).
         """
         try:
             if session_name is None:
@@ -375,11 +339,8 @@ class ChatbotApp:
 
 
     def load_history(self, session_name=None):
-        """Loads a conversation history from a session file.
-
-        Args:
-            session_name (str, optional): The name of the session file to load.
-                If None, the latest session is loaded.
+        """
+        Loads conversation history from a session file (default: latest session).
         """
         try:
             sessions = self.list_sessions()
@@ -408,18 +369,10 @@ class ChatbotApp:
             self.gui.display_message("Bot", "Failed to load session.")
 
     def run(self):
-        """Starts the main application loop and handles graceful shutdown."""
-        try:
-            # Keep the main thread alive
-            while True:
-                import time
-                time.sleep(1)
-        except KeyboardInterrupt:
-            logger.info("Shutdown signal received.")
-        finally:
-            logger.info("Shutting down API server...")
-            self.stop_api_server()
-            logger.info("Application shut down.")
+        """
+        Starts the main event loop of the application.
+        """
+        sys.exit(self.app.exec())
 
 if __name__ == '__main__':
     bot = ChatbotApp()

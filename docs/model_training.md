@@ -1,71 +1,53 @@
 # Model Training and Retraining Guide
 
 ## Overview
+This document explains how to train and retrain the chatbot models (SVM and BERT), data formats, recommended hardware, and the background retraining workflow implemented in `main.py`.
 
-This guide explains how to add new training data and retrain the chatbot's intent classification models. The primary and recommended method for retraining is through the application's **Admin Panel**, which provides a user-friendly interface for this task.
-
-## How the Chatbot Learns: Intents
-
-The chatbot understands user requests by classifying them into **intents**. An intent represents a goal or purpose behind a user's message. For example, a user saying "Hello there" has a `greeting` intent.
-
-Intents are defined in `.json` files located in the `data/intents/` directory. The application automatically loads and merges all `.json` files from this directory.
-
-### Intent File Format
-
-Each intent file should contain a list of intent objects. Each object must have the following structure:
-
+## Data Format
+- Training data is stored in `data/intents/` as JSON files. Each intent file should follow the pattern:
 ```json
 {
-  "intents": [
-    {
-      "tag": "your_intent_name",
-      "patterns": [
-        "A phrase a user might say for this intent.",
-        "Another example of what a user might type.",
-        "More patterns lead to better accuracy."
-      ],
-      "responses": [
-        "The response the chatbot should give for this intent.",
-        "You can provide multiple responses, and the bot will choose one randomly."
-      ]
-    }
-  ]
+  "tag": "greeting",
+  "patterns": ["Hi", "Hello", "Hey there"],
+  "responses": ["Hello!", "Hi there!"],
+  "context_set": "optional"
 }
 ```
 
--   `tag`: A unique name for the intent (e.g., `goodbye`, `order_status`).
--   `patterns`: A list of example sentences or phrases that correspond to this intent. The more diverse the patterns, the better the model will perform.
--   `responses`: A list of possible responses the chatbot can use when it identifies this intent.
+## Training SVM Model (local)
+1. Ensure dependencies are installed:
+```bash
+pip install -r requirements.txt
+```
+2. Run the training script (TODO: add training script path if exists):
+```bash
+python -m model.intent_classifier --train --data-dir data/intents/ --out-dir model/svm
+```
 
-## Adding New Training Data
+## Training BERT Model (local, GPU recommended)
+1. Install PyTorch with CUDA support. Example for CUDA 11.8:
+```bash
+pip install torch --extra-index-url https://download.pytorch.org/whl/cu118
+pip install transformers
+```
+2. Run the BERT training script (TODO: script path):
+```bash
+python -m model.bert_classifier --train --data-dir data/intents/ --out-dir model/bert --epochs 3 --batch-size 16
+```
 
-To teach the chatbot new skills, simply add or edit the `.json` files in the `data/intents/` directory.
+## Background Retraining (zero downtime)
+- The application exposes `ChatbotApp.retrain_model(background=True)` which runs retraining in a background thread and hot-swaps the model on completion.
+- Logs indicate start, progress, completion, and errors.
 
-1.  **Create a New File**: You can add a new file (e.g., `new_skills.json`) to the `data/intents/` directory to keep your new intents organized.
-2.  **Add Your Intent**: Follow the format described above to add your new intent(s) to the file.
-3.  **Save the File**: Save your changes.
-4.  **Retrain the Model**: Follow the steps in the next section to make your changes live.
+## Retraining Best Practices
+- Keep a copy of previous model artifacts (model/svm and model/bert) before replacing.
+- Validate new model on a held-out test set before hot-swap in critical systems.
+- Use small batches for quick incremental updates.
 
-## Retraining the Model (Recommended Method)
+## Monitoring and Logs
+- Training progress and errors are logged to `logs/app.log`.
+- For long jobs, prefer running training in a terminal and monitoring GPU usage with `nvidia-smi`.
 
-The easiest way to retrain the model is by using the **Admin Panel**.
-
-1.  **Launch the Application**: Run the application to open the Admin Panel.
-    ```bash
-    python main.py
-    ```
-2.  **Navigate to the Settings Tab**: Click on the "Settings" tab.
-3.  **Choose a Retraining Option**:
-    -   **Retrain Model (Blocking)**: This option will retrain the model in the foreground. The application may be unresponsive until the training is complete. This is suitable for smaller datasets or when you want immediate confirmation.
-    -   **Retrain Model (Background)**: This is the **recommended** option for larger datasets. It runs the entire training process in a background thread, allowing you to continue using the application without interruption. You will see a notification in the Chat Tester tab once the training is complete and the new model is "hot-swapped" into the live application.
-
-After the retraining process finishes, the chatbot will be updated with its new knowledge.
-
-## Model Types (SVM vs. BERT)
-
-The application supports two different models for intent classification, which can be selected in `config.py` or via the `MODEL_TYPE` environment variable.
-
--   **`svm` (Support Vector Machine)**: A classic, fast, and reliable machine learning model. It works well for small to medium-sized datasets and does not require a GPU.
--   **`bert` (BERT)**: A powerful, modern transformer-based model that can achieve higher accuracy, especially with more complex and nuanced data. Training a BERT model is significantly more resource-intensive and will be much faster on a machine with a CUDA-enabled GPU.
-
-When you trigger a retrain, the application will automatically use the model type currently specified in the configuration.
+## TODO
+- Insert exact script commands if training scripts are provided in the repository.
+- Add validation and fine-tuning instructions.
